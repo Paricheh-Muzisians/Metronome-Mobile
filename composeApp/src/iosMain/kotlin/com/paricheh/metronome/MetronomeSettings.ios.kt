@@ -1,7 +1,7 @@
 package com.paricheh.metronome
 
-import com.paricheh.metronome.settings.MetronomePreferences
-import com.paricheh.metronome.settings.MetronomeSettings
+import com.paricheh.metronome.data.MetronomePreferences
+import com.paricheh.metronome.data.MetronomeSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

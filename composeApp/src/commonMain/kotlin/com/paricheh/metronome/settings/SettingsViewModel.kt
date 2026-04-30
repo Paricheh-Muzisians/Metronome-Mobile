@@ -2,6 +2,8 @@ package com.paricheh.metronome.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paricheh.metronome.data.MetronomePreferences
+import com.paricheh.metronome.data.MetronomeSettings
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -11,11 +13,11 @@ class SettingsViewModel(
     private val settings: MetronomeSettings
 ) : ViewModel() {
 
-    val preferences: StateFlow<MetronomePreferences> = settings.preferences
+    val preferences: StateFlow<MetronomePreferences?> = settings.preferences
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = MetronomePreferences()
+            initialValue = null
         )
 
     fun updateTempo(tempo: Int) {

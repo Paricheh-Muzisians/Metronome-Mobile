@@ -1,4 +1,4 @@
-package com.paricheh.metronome.settings
+package com.paricheh.metronome.data
 
 import kotlinx.coroutines.flow.Flow
 

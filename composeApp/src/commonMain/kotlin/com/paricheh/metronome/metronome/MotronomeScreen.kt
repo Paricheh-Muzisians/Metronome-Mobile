@@ -51,6 +51,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import com.paricheh.metronome.navigation.MetronomeScreens
+import com.paricheh.metronome.navigation.MetronomeScreens.Setting
 import com.paricheh.metronome.theme.headerFont
 import com.paricheh.metronome.utils.titleEnglish
 import com.paricheh.metronome.utils.titlePersian
@@ -65,6 +68,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MetronomeScreen(
+    navController: NavController,
     viewModel: MetronomeViewModel = koinViewModel(),
 ) {
     val currentBpm by viewModel.currentTempoBpm.collectAsStateWithLifecycle()
@@ -104,7 +108,7 @@ fun MetronomeScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            //TODO navigate to setting
+                            navController.navigate(Setting)
                         }
                     ) {
                         Icon(
@@ -254,7 +258,7 @@ fun MetronomeScreen(
                         .height(metronomeBodyHeight * 0.08f)
                         .offset(
                             y = (-metronomeBodyHeight * 0.75f) -
-                                (metronomeBodyHeight * bpmPointerOffsetWeight)
+                                    (metronomeBodyHeight * bpmPointerOffsetWeight)
                         )
                         .align(Alignment.BottomCenter)
                 )

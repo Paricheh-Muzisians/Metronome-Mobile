@@ -1,4 +1,4 @@
-package com.paricheh.metronome.settings
+package com.paricheh.metronome.data
 
 data class MetronomePreferences(
     val tempo: Int = 120,

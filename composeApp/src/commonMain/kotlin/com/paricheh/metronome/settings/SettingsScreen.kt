@@ -1,5 +1,6 @@
-package com.paricheh.metronome.ui
+package com.paricheh.metronome.settings
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -25,15 +26,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.paricheh.metronome.settings.SettingsViewModel
+import androidx.navigation.NavController
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier,
+    navController: NavController,
     viewModel: SettingsViewModel = koinViewModel(),
-    onNavigateBack: () -> Unit = {}
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
 
@@ -42,7 +42,11 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(
+                        onClick = {
+                            navController.navigateUp()
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
@@ -52,61 +56,72 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            // Tempo Section
-            TempoSection(
-                tempo = preferences.tempo,
-                onTempoChange = { viewModel.updateTempo(it) }
-            )
-
-            HorizontalDivider()
-
-            // Time Signature Section
-            TimeSignatureSection(
-                beats = preferences.timeSignatureBeats,
-                beatUnit = preferences.timeSignatureBeatUnit,
-                onTimeSignatureChange = { beats, unit ->
-                    viewModel.updateTimeSignature(beats, unit)
+        AnimatedContent(
+            targetState = preferences == null
+        ) { isLoading ->
+            if (isLoading ) {
+                Box(Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-            )
+            } else preferences?.let { preferences ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    // Tempo Section
+                    TempoSection(
+                        tempo = preferences.tempo,
+                        onTempoChange = { viewModel.updateTempo(it) }
+                    )
 
-            HorizontalDivider()
+                    HorizontalDivider()
 
-            // Accent First Beat
-            SwitchSetting(
-                title = "Accent First Beat",
-                description = "Play a different sound on the first beat",
-                checked = preferences.accentFirstBeat,
-                onCheckedChange = { viewModel.updateAccentFirstBeat(it) }
-            )
+                    // Time Signature Section
+                    TimeSignatureSection(
+                        beats = preferences.timeSignatureBeats,
+                        beatUnit = preferences.timeSignatureBeatUnit,
+                        onTimeSignatureChange = { beats, unit ->
+                            viewModel.updateTimeSignature(beats, unit)
+                        }
+                    )
 
-            HorizontalDivider()
+                    HorizontalDivider()
 
-            // Sound Enabled
-            SwitchSetting(
-                title = "Sound",
-                description = "Enable metronome click sound",
-                checked = preferences.soundEnabled,
-                onCheckedChange = { viewModel.updateSoundEnabled(it) }
-            )
+                    // Accent First Beat
+                    SwitchSetting(
+                        title = "Accent First Beat",
+                        description = "Play a different sound on the first beat",
+                        checked = preferences.accentFirstBeat,
+                        onCheckedChange = { viewModel.updateAccentFirstBeat(it) }
+                    )
 
-            HorizontalDivider()
+                    HorizontalDivider()
 
-            // Vibration Enabled
-            SwitchSetting(
-                title = "Vibration",
-                description = "Enable haptic feedback on each beat",
-                checked = preferences.vibrationEnabled,
-                onCheckedChange = { viewModel.updateVibrationEnabled(it) }
-            )
+                    // Sound Enabled
+                    SwitchSetting(
+                        title = "Sound",
+                        description = "Enable metronome click sound",
+                        checked = preferences.soundEnabled,
+                        onCheckedChange = { viewModel.updateSoundEnabled(it) }
+                    )
+
+                    HorizontalDivider()
+
+                    // Vibration Enabled
+                    SwitchSetting(
+                        title = "Vibration",
+                        description = "Enable haptic feedback on each beat",
+                        checked = preferences.vibrationEnabled,
+                        onCheckedChange = { viewModel.updateVibrationEnabled(it) }
+                    )
+                }
+            }
         }
+
     }
 }
 
@@ -333,7 +348,9 @@ private fun TimeSignatureSection(
                                     },
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
+                                            alpha = 0.5f
+                                        )
                                     ),
                                     shape = RoundedCornerShape(12.dp),
                                     modifier = Modifier
@@ -413,7 +430,9 @@ private fun TimeSignatureSection(
                                     },
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
+                                            alpha = 0.5f
+                                        )
                                     ),
                                     shape = RoundedCornerShape(12.dp),
                                     modifier = Modifier

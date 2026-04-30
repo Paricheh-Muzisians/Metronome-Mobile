@@ -18,12 +18,6 @@ class MetronomeApplication : Application() {
             androidContext(this@MetronomeApplication)
 
             modules(metronomeModule)
-            modules(settingsModule)
         }
     }
-}
-
-val settingsModule = module {
-    single { createMetronomeSettings() }
-    viewModel { SettingsViewModel(get()) }
 }

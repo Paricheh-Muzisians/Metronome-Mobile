@@ -1,24 +1,39 @@
 package com.paricheh.metronome.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paricheh.metronome.settings.SettingsViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    modifier: Modifier,
-    viewModel: SettingsViewModel,
-    onNavigateBack: () -> Unit
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = koinViewModel(),
+    onNavigateBack: () -> Unit = {}
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
 
@@ -122,20 +137,46 @@ private fun TempoSection(
         Slider(
             value = tempo.toFloat(),
             onValueChange = { onTempoChange(it.toInt()) },
-            valueRange = 40f..240f,
-            steps = 199,
+            valueRange = 20f..240f,
+            steps = 219,
             modifier = Modifier.fillMaxWidth()
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "40",
+                text = "20",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                IconButton(
+                    onClick = { if (tempo > 20) onTempoChange(tempo - 1) },
+                    enabled = tempo > 20
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Remove,
+                        contentDescription = "Decrease tempo"
+                    )
+                }
+
+                IconButton(
+                    onClick = { if (tempo < 240) onTempoChange(tempo + 1) },
+                    enabled = tempo < 240
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Increase tempo"
+                    )
+                }
+            }
+
             Text(
                 text = "240",
                 style = MaterialTheme.typography.bodySmall,
@@ -152,6 +193,21 @@ private fun TimeSignatureSection(
     beatUnit: Int,
     onTimeSignatureChange: (Int, Int) -> Unit
 ) {
+    val commonSignatures = listOf(
+        2 to 4,
+        3 to 4,
+        4 to 4,
+        5 to 4,
+        6 to 8,
+        7 to 8,
+        9 to 8,
+        12 to 8
+    )
+
+    var showCustomPicker by remember { mutableStateOf(false) }
+    val currentSignature = beats to beatUnit
+    val isCustom = currentSignature !in commonSignatures
+
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -160,104 +216,244 @@ private fun TimeSignatureSection(
             style = MaterialTheme.typography.titleMedium
         )
 
-        Row(
+        // Common signatures grid
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Beats per measure
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Beats per measure",
-                    style = MaterialTheme.typography.bodyMedium
+            commonSignatures.forEach { (b, u) ->
+                FilterChip(
+                    selected = beats == b && beatUnit == u && !showCustomPicker,
+                    onClick = {
+                        onTimeSignatureChange(b, u)
+                        showCustomPicker = false
+                    },
+                    label = { Text("$b/$u") }
                 )
-
-                var expanded by remember { mutableStateOf(false) }
-
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = beats.toString(),
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        (1..12).forEach { beat ->
-                            DropdownMenuItem(
-                                text = { Text(beat.toString()) },
-                                onClick = {
-                                    onTimeSignatureChange(beat, beatUnit)
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
             }
 
-            // Beat unit
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Beat unit",
-                    style = MaterialTheme.typography.bodyMedium
+            // Custom option
+            FilterChip(
+                selected = showCustomPicker || (isCustom && !showCustomPicker),
+                onClick = { showCustomPicker = !showCustomPicker },
+                label = {
+                    Text(if (isCustom && !showCustomPicker) "$beats/$beatUnit" else "Custom")
+                }
+            )
+        }
+
+        // Custom picker with animation
+        AnimatedVisibility(
+            visible = showCustomPicker,
+            enter = expandVertically(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
                 )
-
-                var expanded by remember { mutableStateOf(false) }
-                val beatUnits = listOf(2, 4, 8, 16)
-
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it }
+            ) + fadeIn(
+                animationSpec = tween(300)
+            ),
+            exit = shrinkVertically(
+                animationSpec = tween(300)
+            ) + fadeOut(
+                animationSpec = tween(200)
+            )
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    OutlinedTextField(
-                        value = beatUnit.toString(),
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        beatUnits.forEach { unit ->
-                            DropdownMenuItem(
-                                text = { Text(unit.toString()) },
-                                onClick = {
-                                    onTimeSignatureChange(beats, unit)
-                                    expanded = false
-                                }
+                        Text(
+                            text = "Custom Time Signature",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text = "$beats/$beatUnit",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Beats per measure
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Beats",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+
+                            var expanded by remember { mutableStateOf(false) }
+
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = it }
+                            ) {
+                                OutlinedTextField(
+                                    value = beats.toString(),
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    textStyle = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        textAlign = TextAlign.Center
+                                    ),
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(
+                                            expanded = expanded
+                                        )
+                                    },
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    modifier = Modifier.heightIn(max = 300.dp)
+                                ) {
+                                    (1..12).forEach { beat ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    beat.toString(),
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = if (beat == beats) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            },
+                                            onClick = {
+                                                onTimeSignatureChange(beat, beatUnit)
+                                                expanded = false
+                                            },
+                                            leadingIcon = if (beat == beats) {
+                                                {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+                                            } else null,
+                                            colors = MenuDefaults.itemColors(
+                                                textColor = if (beat == beats)
+                                                    MaterialTheme.colorScheme.primary
+                                                else
+                                                    MaterialTheme.colorScheme.onSurface
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Beat unit
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Unit",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            var expanded by remember { mutableStateOf(false) }
+                            val beatUnits = listOf(2, 4, 8, 16)
+
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = it }
+                            ) {
+                                OutlinedTextField(
+                                    value = beatUnit.toString(),
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    textStyle = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        textAlign = TextAlign.Center
+                                    ),
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(
+                                            expanded = expanded
+                                        )
+                                    },
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    beatUnits.forEach { unit ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    unit.toString(),
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = if (unit == beatUnit) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            },
+                                            onClick = {
+                                                onTimeSignatureChange(beats, unit)
+                                                expanded = false
+                                            },
+
+                                            colors = MenuDefaults.itemColors(
+                                                textColor = if (unit == beatUnit)
+                                                    MaterialTheme.colorScheme.primary
+                                                else
+                                                    MaterialTheme.colorScheme.onSurface
+                                            )
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-
-        // Display current time signature
-        Text(
-            text = "Current: $beats/$beatUnit",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
     }
 }
 

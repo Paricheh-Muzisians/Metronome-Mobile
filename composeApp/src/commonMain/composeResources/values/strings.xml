@@ -1,0 +1,26 @@
+<resources>
+    <string name="persian_tempo_prestissimo">پرستیسیمو</string>
+    <string name="persian_tempo_presto">پرستو</string>
+    <string name="persian_tempo_vivace">ویواچه</string>
+    <string name="persian_tempo_allegro">آلگرو</string>
+    <string name="persian_tempo_moderato">مودراتو</string>
+    <string name="persian_tempo_andante">آندانته</string>
+    <string name="persian_tempo_adagio">آداجیو</string>
+    <string name="persian_tempo_larghetto">لارگتو</string>
+    <string name="persian_tempo_lento">لنتو</string>
+    <string name="persian_tempo_largo">لارگو</string>
+    <string name="persian_tempo_grave">گراوه</string>
+    <string name="persian_tempo_larghissimo">لارگیسیسمو</string>
+    <string name="english_tempo_prestissimo">Prestissimo</string>
+    <string name="english_tempo_presto">Presto</string>
+    <string name="english_tempo_vivace">Vivace</string>
+    <string name="english_tempo_allegro">Allegro</string>
+    <string name="english_tempo_moderato">Moderato</string>
+    <string name="english_tempo_andante">Andante</string>
+    <string name="english_tempo_adagio">Adagio</string>
+    <string name="english_tempo_larghetto">Larghetto</string>
+    <string name="english_tempo_lento">Lento</string>
+    <string name="english_tempo_largo">Largo</string>
+    <string name="english_tempo_grave">Grave</string>
+    <string name="english_tempo_larghissimo">Larghissimo</string>
+</resources>

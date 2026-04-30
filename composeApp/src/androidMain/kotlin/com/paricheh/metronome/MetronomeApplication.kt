@@ -1,6 +1,7 @@
 package com.paricheh.metronome
 
 import android.app.Application
+import com.paricheh.metronome.di.metronomeModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -13,7 +14,7 @@ class MetronomeApplication : Application() {
             androidContext(this@MetronomeApplication)
 
             modules(
-                // Add New modules here
+                metronomeModule
             )
         }
     }

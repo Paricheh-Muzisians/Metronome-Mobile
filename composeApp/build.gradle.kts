@@ -14,7 +14,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -24,7 +24,7 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)

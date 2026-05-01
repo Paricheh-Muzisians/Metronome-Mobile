@@ -7,13 +7,7 @@ pluginManagement {
             url = uri("https://maven.myket.ir/")
         }
 
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -25,13 +19,7 @@ dependencyResolutionManagement {
             url = uri("https://maven.myket.ir/")
         }
 
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
+        google()
         mavenCentral()
     }
 }

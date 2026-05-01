@@ -9,7 +9,6 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Settings
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,16 +45,15 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.paricheh.metronome.navigation.MetronomeScreens
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
-import com.paricheh.metronome.theme.headerFont
+import com.paricheh.metronome.theme.NonCommonTypography
 import com.paricheh.metronome.utils.titleEnglish
 import com.paricheh.metronome.utils.titlePersian
+import com.paricheh.metronome.utils.toPersianNumbers
 import metronome.composeapp.generated.resources.Res
 import metronome.composeapp.generated.resources.metroneome_pendulum_axis_layer
 import metronome.composeapp.generated.resources.metronome_body_layer
@@ -113,11 +110,10 @@ fun MetronomeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.TwoTone.Settings,
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             contentDescription = "setting"
                         )
                     }
-
                 }
             )
         }
@@ -169,55 +165,52 @@ fun MetronomeScreen(
                 }
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    //TODO use font family
                     Text(
                         text = stringResource(currentTempoMarkings.titlePersian()),
-                        color = Color.White,
-                        fontFamily = headerFont(),
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 57.sp,
-                        lineHeight = 64.sp
+                        color = MaterialTheme.colorScheme.primary,
+                        style = NonCommonTypography.PersianSonatiHeader
                     )
 
                     Text(
                         text = stringResource(currentTempoMarkings.titleEnglish()),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = NonCommonTypography.EnglishSontatiHeader,
                     )
                 }
             }
 
-            Column(
+
+            val tempoText = buildAnnotatedString {
+                val currentTempoNumber = currentBpm.toInt()
+                    .toString()
+                    .toPersianNumbers()
+
+                append(currentTempoNumber)
+                appendLine()
+                append("بی‌پی‌ام")
+
+                addStyle(
+                    style = NonCommonTypography.PersianSonatiNumber
+                        .toSpanStyle()
+                        .copy(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                    start = 0,
+                    end = currentTempoNumber.length + 1
+                )
+            }
+
+            Text(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = -metronomeBodyHeight * 0.85f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = currentBpm.toInt().toString(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold
-                )
-
-                Text(
-                    text = "Bpm",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelSmall,
-                )
-
-                val onMetronomeColor = MaterialTheme.colorScheme.onSurfaceVariant
-
-                Canvas(modifier = Modifier.padding(top = 8.dp)) {
-                    drawCircle(
-                        color = onMetronomeColor,
-                        radius = 8f
-                    )
-                }
-            }
+                    .offset(y = -metronomeBodyHeight * 0.8f),
+                text = tempoText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = NonCommonTypography.PersianSonatiLabel,
+            )
 
             Box(
                 modifier = Modifier
@@ -238,7 +231,7 @@ fun MetronomeScreen(
                         rotationZ = angle
                         transformOrigin = TransformOrigin(
                             0.5f,
-                            0.91f
+                            0.9f
                         )
                     }
             ) {
@@ -258,7 +251,7 @@ fun MetronomeScreen(
                         .height(metronomeBodyHeight * 0.08f)
                         .offset(
                             y = (-metronomeBodyHeight * 0.75f) -
-                                    (metronomeBodyHeight * bpmPointerOffsetWeight)
+                                (metronomeBodyHeight * bpmPointerOffsetWeight)
                         )
                         .align(Alignment.BottomCenter)
                 )
@@ -266,3 +259,4 @@ fun MetronomeScreen(
         }
     }
 }
+

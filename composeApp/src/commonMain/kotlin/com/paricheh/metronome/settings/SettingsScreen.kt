@@ -9,6 +9,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +28,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import metronome.composeapp.generated.resources.Res
+import metronome.composeapp.generated.resources.settings_title
+import metronome.composeapp.generated.resources.cd_back
+import metronome.composeapp.generated.resources.accent_first_beat
+import metronome.composeapp.generated.resources.accent_first_beat_desc
+import metronome.composeapp.generated.resources.beats
+import metronome.composeapp.generated.resources.sound
+import metronome.composeapp.generated.resources.sound_desc
+import metronome.composeapp.generated.resources.vibration
+import metronome.composeapp.generated.resources.vibration_desc
+import metronome.composeapp.generated.resources.tempo
+import metronome.composeapp.generated.resources.bpm_format
+import metronome.composeapp.generated.resources.tempo_min
+import metronome.composeapp.generated.resources.cd_decrease_tempo
+import metronome.composeapp.generated.resources.cd_increase_tempo
+import metronome.composeapp.generated.resources.custom
+import metronome.composeapp.generated.resources.custom_time_signature
+import metronome.composeapp.generated.resources.tempo_max
+import metronome.composeapp.generated.resources.time_signature
+import metronome.composeapp.generated.resources.unit
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,16 +62,14 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(Res.string.settings_title)) },
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            navController.navigateUp()
-                        }
+                        onClick = { navController.navigateUp() }
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(Res.string.cd_back)
                         )
                     }
                 }
@@ -57,9 +77,10 @@ fun SettingsScreen(
         }
     ) { paddingValues ->
         AnimatedContent(
-            targetState = preferences == null
+            targetState = preferences == null,
+            transitionSpec = { fadeIn() togetherWith fadeOut() }
         ) { isLoading ->
-            if (isLoading ) {
+            if (isLoading) {
                 Box(Modifier.fillMaxSize()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
@@ -72,7 +93,7 @@ fun SettingsScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Tempo Section
+
                     TempoSection(
                         tempo = preferences.tempo,
                         onTempoChange = { viewModel.updateTempo(it) }
@@ -80,7 +101,6 @@ fun SettingsScreen(
 
                     HorizontalDivider()
 
-                    // Time Signature Section
                     TimeSignatureSection(
                         beats = preferences.timeSignatureBeats,
                         beatUnit = preferences.timeSignatureBeatUnit,
@@ -91,59 +111,54 @@ fun SettingsScreen(
 
                     HorizontalDivider()
 
-                    // Accent First Beat
                     SwitchSetting(
-                        title = "Accent First Beat",
-                        description = "Play a different sound on the first beat",
+                        title = stringResource(Res.string.accent_first_beat),
+                        description = stringResource(Res.string.accent_first_beat_desc),
                         checked = preferences.accentFirstBeat,
                         onCheckedChange = { viewModel.updateAccentFirstBeat(it) }
                     )
 
                     HorizontalDivider()
 
-                    // Sound Enabled
                     SwitchSetting(
-                        title = "Sound",
-                        description = "Enable metronome click sound",
+                        title = stringResource(Res.string.sound),
+                        description = stringResource(Res.string.sound_desc),
                         checked = preferences.soundEnabled,
                         onCheckedChange = { viewModel.updateSoundEnabled(it) }
                     )
 
                     HorizontalDivider()
 
-                    // Vibration Enabled
                     SwitchSetting(
-                        title = "Vibration",
-                        description = "Enable haptic feedback on each beat",
+                        title = stringResource(Res.string.vibration),
+                        description = stringResource(Res.string.vibration_desc),
                         checked = preferences.vibrationEnabled,
                         onCheckedChange = { viewModel.updateVibrationEnabled(it) }
                     )
                 }
             }
         }
-
     }
 }
 
 @Composable
 private fun TempoSection(
     tempo: Int,
-    onTempoChange: (Int) -> Unit
+    onTempoChange: (Int) -> Unit,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Tempo",
+                text = stringResource(Res.string.tempo),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "$tempo BPM",
+                text = stringResource(Res.string.bpm_format, tempo),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -163,21 +178,19 @@ private fun TempoSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "20",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = stringResource(Res.string.tempo_min),
+                style = MaterialTheme.typography.bodySmall
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
                 IconButton(
                     onClick = { if (tempo > 20) onTempoChange(tempo - 1) },
                     enabled = tempo > 20
                 ) {
                     Icon(
                         imageVector = Icons.Default.Remove,
-                        contentDescription = "Decrease tempo"
+                        contentDescription = stringResource(Res.string.cd_decrease_tempo)
                     )
                 }
 
@@ -187,15 +200,14 @@ private fun TempoSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Increase tempo"
+                        contentDescription = stringResource(Res.string.cd_increase_tempo)
                     )
                 }
             }
 
             Text(
-                text = "240",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = stringResource(Res.string.tempo_max),
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }
@@ -206,7 +218,7 @@ private fun TempoSection(
 private fun TimeSignatureSection(
     beats: Int,
     beatUnit: Int,
-    onTimeSignatureChange: (Int, Int) -> Unit
+    onTimeSignatureChange: (Int, Int) -> Unit,
 ) {
     val commonSignatures = listOf(
         2 to 4,
@@ -227,7 +239,7 @@ private fun TimeSignatureSection(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Time Signature",
+            text = stringResource(Res.string.time_signature),
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -253,7 +265,11 @@ private fun TimeSignatureSection(
                 selected = showCustomPicker || (isCustom && !showCustomPicker),
                 onClick = { showCustomPicker = !showCustomPicker },
                 label = {
-                    Text(if (isCustom && !showCustomPicker) "$beats/$beatUnit" else "Custom")
+                    Text(
+                        if (isCustom && !showCustomPicker)
+                            "$beats/$beatUnit"
+                        else stringResource(Res.string.custom)
+                    )
                 }
             )
         }
@@ -299,7 +315,7 @@ private fun TimeSignatureSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Custom Time Signature",
+                            text = stringResource(Res.string.custom_time_signature),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -322,7 +338,7 @@ private fun TimeSignatureSection(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Beats",
+                                text = stringResource(Res.string.beats),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -403,7 +419,7 @@ private fun TimeSignatureSection(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Unit",
+                                text = stringResource(Res.string.unit),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -481,7 +497,7 @@ private fun SwitchSetting(
     title: String,
     description: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),

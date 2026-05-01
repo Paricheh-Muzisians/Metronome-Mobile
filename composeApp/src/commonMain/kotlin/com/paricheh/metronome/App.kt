@@ -2,6 +2,7 @@ package com.paricheh.metronome
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,15 +15,18 @@ import com.paricheh.metronome.metronome.MetronomeScreen
 import com.paricheh.metronome.navigation.MetronomeScreens.Metronome
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
 import com.paricheh.metronome.settings.SettingsScreen
+import com.paricheh.metronome.theme.MetronomeTheme
 
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
+    MetronomeTheme {
         val navController = rememberNavController()
 
         NavHost(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .fillMaxSize(),
             navController = navController,
             startDestination = Metronome
         ) {

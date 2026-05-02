@@ -23,4 +23,23 @@
     <string name="english_tempo_largo">Largo</string>
     <string name="english_tempo_grave">Grave</string>
     <string name="english_tempo_larghissimo">Larghissimo</string>
+    <string name="settings_title">تنظیمات</string>
+    <string name="cd_back">بازگشت</string>
+    <string name="tempo">تمپو</string>
+    <string name="bpm_format">%1$d BPM</string>
+    <string name="tempo_min">20</string>
+    <string name="tempo_max">240</string>
+    <string name="cd_increase_tempo">افزایش تمپو</string>
+    <string name="cd_decrease_tempo">کاهش تمپو</string>
+    <string name="time_signature">کسر میزان</string>
+    <string name="custom">سفارشی</string>
+    <string name="custom_time_signature">کسر میزان سفارشی</string>
+    <string name="beats">ضرب‌ها</string>
+    <string name="unit">واحد</string>
+    <string name="accent_first_beat">تأکید روی ضرب اول</string>
+    <string name="accent_first_beat_desc">پخش صدای متفاوت برای ضرب اول</string>
+    <string name="sound">صدا</string>
+    <string name="sound_desc">فعال‌سازی صدای مترونوم</string>
+    <string name="vibration">لرزش</string>
+    <string name="vibration_desc">بازخورد لرزشی در هر ضرب</string>
 </resources>

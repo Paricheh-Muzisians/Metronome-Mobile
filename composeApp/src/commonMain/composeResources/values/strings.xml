@@ -42,4 +42,14 @@
     <string name="sound_desc">فعال‌سازی صدای مترونوم</string>
     <string name="vibration">لرزش</string>
     <string name="vibration_desc">بازخورد لرزشی در هر ضرب</string>
+    <string name="compund_time_signature">کسر میزان ترکیبی</string>
+    <string name="irregular_time_signature">کسر میزان مختلط</string>
+    <string name="message_irregular_time_signature_warning">لطفا توجه کنید برای کسر میزان انتخاب شده هر میزان به شکل زیر در نظر گرفته شده، در صورت نیاز به از قابلیت تبدیل کسر میزان استفاده کنید.</string>
+    <string name="increment">افزایش</string>
+    <string name="decrement">کاهش</string>
+    <string name="detect_tempo">تشخیص تمپو</string>
+    <string name="detect_tempo_message">با ضربه زدن روی صفحع پایین تمپوی خود را پیدا کنین.</string>
+    <string name="tab_here">اینجا ضربه بزنید</string>
+    <string name="time_signature_hint">با انتخاب یک کسر میزان ضرب اول هر میزان به صورت آکسانت (Accent) پخش خواهد شد.</string>
+    <string name="unselected">بدون انتخاب</string>
 </resources>

@@ -65,8 +65,13 @@ object NonCommonTypography {
         )
     val musicFont
         @Composable
-        get() = Typography().titleMedium.copy(
-            fontFamily = gulzarFont
+        get() = Typography().headlineMedium.copy(
+            fontFamily = natoMusicFont
+        )
+    val musicFontLarge
+        @Composable
+        get() = Typography().headlineLarge.copy(
+            fontFamily = natoMusicFont
         )
 
 }

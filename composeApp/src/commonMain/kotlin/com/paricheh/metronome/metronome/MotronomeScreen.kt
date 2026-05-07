@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,11 +47,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
 import com.paricheh.metronome.theme.NonCommonTypography
+import com.paricheh.metronome.utils.TimeSignature
 import com.paricheh.metronome.utils.titleEnglish
 import com.paricheh.metronome.utils.titlePersian
 import com.paricheh.metronome.utils.toPersianNumbers
@@ -73,6 +76,16 @@ fun MetronomeScreen(
     val durationInMillisecond by viewModel.durationInMillisecond.collectAsStateWithLifecycle()
     val isMetronomeStarted by viewModel.isMetronomeStarted.collectAsStateWithLifecycle()
     val currentTempoMarkings by viewModel.currentTempoMarkings.collectAsStateWithLifecycle()
+    val preferences by viewModel.metronomePreferences.collectAsStateWithLifecycle()
+
+    val selectedTimeSignature by remember(preferences) {
+        derivedStateOf {
+            TimeSignature(
+                preferences?.timeSignatureBeats ?: -1,
+                preferences?.timeSignatureBeatUnit ?: -1
+            ).takeIf { it.numerator != -1 || it.denominator != -1 }
+        }
+    }
 
     var metronomeBodyHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
@@ -168,16 +181,20 @@ fun MetronomeScreen(
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val musicianTempoText = buildAnnotatedString {
+                        append(stringResource(currentTempoMarkings.titleEnglish()))
+                    }
+
                     Text(
-                        text = stringResource(currentTempoMarkings.titlePersian()),
+                        text = musicianTempoText,
                         color = MaterialTheme.colorScheme.primary,
-                        style = NonCommonTypography.PersianSonatiHeader
+                        style = NonCommonTypography.EnglishSontatiHeader,
                     )
 
                     Text(
-                        text = stringResource(currentTempoMarkings.titleEnglish()),
+                        text = stringResource(currentTempoMarkings.titlePersian()),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = NonCommonTypography.EnglishSontatiHeader,
+                        style = NonCommonTypography.PersianSonatiHeader
                     )
                 }
             }
@@ -186,21 +203,28 @@ fun MetronomeScreen(
             val tempoText = buildAnnotatedString {
                 val currentTempoNumber = currentBpm.toInt()
                     .toString()
-                    .toPersianNumbers()
 
-                append(currentTempoNumber)
-                appendLine()
-                append("بی‌پی‌ام")
+                selectedTimeSignature?.let {
+                    withStyle(
+                        style = NonCommonTypography.musicFont.toSpanStyle()
+                    ) {
+                        append(it.getUnitNote().getUnitCharByUnit())
+                        append("=")
 
-                addStyle(
+                    }
+                }
+                withStyle(
                     style = NonCommonTypography.PersianSonatiNumber
                         .toSpanStyle()
                         .copy(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                    start = 0,
-                    end = currentTempoNumber.length + 1
-                )
+                        )
+                ) {
+                    append(currentTempoNumber)
+                }
+
+                appendLine()
+                append("بی‌پی‌ام")
             }
 
             Text(

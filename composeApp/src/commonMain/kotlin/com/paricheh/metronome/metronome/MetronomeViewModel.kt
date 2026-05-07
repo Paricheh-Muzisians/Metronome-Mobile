@@ -7,11 +7,13 @@ import com.paricheh.metronome.sound.MetronomeSoundPlayer
 import com.paricheh.metronome.utils.getTempoMarkingByBpm
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MetronomeViewModel(
@@ -40,6 +42,13 @@ class MetronomeViewModel(
 
     private val _pendulumAngle = MutableStateFlow(0f)
     val pendulumAngle = _pendulumAngle.asStateFlow()
+
+    val metronomePreferences = settings.preferences
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
 
     init {
         observeTempoMarking()

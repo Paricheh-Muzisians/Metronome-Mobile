@@ -21,6 +21,19 @@ class TimeSignature(
         defaultBarsStructure
     }
 
+    fun getUnitNote() = when (type) {
+        Simple -> {
+            Note(weight = denominator)
+        }
+
+        else -> {
+            Note(
+                weight = denominator / 2,
+                isDot = true
+            )
+        }
+    }
+
     private fun calculateBarsStructure(): List<Note> {
         return when (type) {
             Simple -> {

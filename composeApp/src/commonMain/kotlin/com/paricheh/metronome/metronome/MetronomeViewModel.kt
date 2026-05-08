@@ -113,7 +113,6 @@ class MetronomeViewModel(
                     }
                     delay(durationInMillisecond.value.toLong())
                     soundPlayer.playTick(isAccent)
-
                 }
             }
         }

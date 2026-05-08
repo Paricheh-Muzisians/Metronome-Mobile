@@ -56,7 +56,6 @@ import com.paricheh.metronome.theme.NonCommonTypography
 import com.paricheh.metronome.utils.TimeSignature
 import com.paricheh.metronome.utils.titleEnglish
 import com.paricheh.metronome.utils.titlePersian
-import com.paricheh.metronome.utils.toPersianNumbers
 import metronome.composeapp.generated.resources.Res
 import metronome.composeapp.generated.resources.metroneome_pendulum_axis_layer
 import metronome.composeapp.generated.resources.metronome_body_layer

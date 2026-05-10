@@ -75,6 +75,7 @@ import metronome.composeapp.generated.resources.decrement
 import metronome.composeapp.generated.resources.detect_tempo
 import metronome.composeapp.generated.resources.detect_tempo_message
 import metronome.composeapp.generated.resources.increment
+import metronome.composeapp.generated.resources.irregular_time_signature
 import metronome.composeapp.generated.resources.message_irregular_time_signature_warning
 import metronome.composeapp.generated.resources.settings_title
 import metronome.composeapp.generated.resources.tab_here
@@ -430,10 +431,7 @@ private fun TimeSignatureSection(
         }
 
         AnimatedVisibility(
-            visible = selectedTimeSignature?.type in setOf(
-                TimeSignatureType.Compound,
-                TimeSignatureType.Irregular
-            )
+            visible = selectedTimeSignature?.type != null
         ) {
             Column {
                 Spacer(Modifier.height(16.dp))
@@ -449,7 +447,7 @@ private fun TimeSignatureSection(
                             text = if (selectedTimeSignature?.type == TimeSignatureType.Compound) {
                                 stringResource(Res.string.compund_time_signature)
                             } else {
-                                stringResource(Res.string.compund_time_signature)
+                                stringResource(Res.string.irregular_time_signature)
                             },
                         )
                     }

@@ -50,6 +50,7 @@ class MetronomeViewModel(
         observeTempoMarking()
         observeDurationChanges()
         observeStartingMetronome()
+        observeSoundPlaying()
     }
 
     fun setTempo(bpm: Float) {
@@ -87,39 +88,50 @@ class MetronomeViewModel(
     private fun getDurationOnEachBeatByBpm(newTempo: Float): Float =
         60000 / newTempo
 
-    private fun observeStartingMetronome() {
+    private fun observeSoundPlaying() {
         viewModelScope.launch {
             isMetronomeStarted.collectLatest { isStarted ->
-                val numerator = metronomePreferences.value?.timeSignatureBeats
-                val denominator = metronomePreferences.value?.timeSignatureBeatUnit
+                if (!isStarted) return@collectLatest
+                val selectedTimeSignature = metronomePreferences.value
+                    ?.selectedTimeSignature
 
-                val currentTimeSignature = if (numerator != null && denominator != null) {
-                    TimeSignature(
-                        numerator = numerator,
-                        denominator = denominator
-                    )
-                } else {
-                    null
-                }
+                val barStructure = metronomePreferences.value
+                    ?.selectedBarStructure
+                    ?: selectedTimeSignature
+                        ?.defaultBarsStructure
+                        .orEmpty()
 
-                while (isStarted) {
+                val isConvertedBar =
+                    barStructure.size != selectedTimeSignature?.defaultBarsStructure?.size
+
+                while (true) {
                     var i = 0
                     do {
-                        currentTimeSignature?.defaultBarsStructure
-                        _pendulumAngle.value = if (pendulumAngle.value > 0) {
-                            -25f
-                        } else {
-                            25f
-                        }
-                        delay(durationInMillisecond.value.toLong())
-
-                        val isAccent = currentTimeSignature?.defaultBarsStructure
-                            ?.getOrNull(i++)
+                        val isAccent = barStructure
+                            .getOrNull(i++)
                             ?.isAccent
                             ?: false
 
+                        delay(durationInMillisecond.value.toLong())
                         soundPlayer.playTick(isAccent)
-                    } while (i <= (currentTimeSignature?.defaultBarsStructure?.lastIndex ?: -1))
+                    } while (i <= barStructure.lastIndex)
+                }
+            }
+        }
+    }
+
+    private fun observeStartingMetronome() {
+        viewModelScope.launch {
+            isMetronomeStarted.collectLatest { isStarted ->
+                if (!isStarted) return@collectLatest
+
+                while (true) {
+                    _pendulumAngle.value = if (pendulumAngle.value > 0) {
+                        -25f
+                    } else {
+                        25f
+                    }
+                    delay(durationInMillisecond.value.toLong())
                 }
             }
         }

@@ -1,9 +1,11 @@
 package com.paricheh.metronome.utils
 
 import androidx.compose.runtime.Stable
+import kotlinx.serialization.Serializable
 
 @Stable
-class Note(
+@Serializable
+data class Note(
     val weight: Int,
     val isAccent: Boolean = false,
     val isDot: Boolean = false,

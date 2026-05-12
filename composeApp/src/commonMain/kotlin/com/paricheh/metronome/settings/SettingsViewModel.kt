@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paricheh.metronome.data.MetronomePreferences
 import com.paricheh.metronome.data.MetronomeSettings
+import com.paricheh.metronome.utils.TimeSignature
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -26,21 +27,9 @@ class SettingsViewModel(
         }
     }
 
-    fun updateTimeSignature(beats: Int, beatUnit: Int) {
+    fun updateTimeSignature(timeSignature: TimeSignature?) {
         viewModelScope.launch {
-            settings.updateTimeSignature(beats, beatUnit)
-        }
-    }
-
-    fun updateAccentFirstBeat(enabled: Boolean) {
-        viewModelScope.launch {
-            settings.updateAccentFirstBeat(enabled)
-        }
-    }
-
-    fun updateSoundEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            settings.updateSoundEnabled(enabled)
+            settings.updateTimeSignature(timeSignature)
         }
     }
 

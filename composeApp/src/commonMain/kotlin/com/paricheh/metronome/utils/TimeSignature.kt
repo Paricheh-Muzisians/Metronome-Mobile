@@ -7,19 +7,16 @@ import androidx.compose.runtime.setValue
 import com.paricheh.metronome.utils.TimeSignatureType.Compound
 import com.paricheh.metronome.utils.TimeSignatureType.Irregular
 import com.paricheh.metronome.utils.TimeSignatureType.Simple
+import kotlinx.serialization.Serializable
 
 @Stable
+@Serializable
 class TimeSignature(
     val numerator: Int,
     val denominator: Int,
 ) {
     val type = calculateType()
     val defaultBarsStructure = calculateBarsStructure()
-    var convertedBarsStructure by mutableStateOf(defaultBarsStructure)
-
-    infix fun convertDenominator(to: Int) {
-        defaultBarsStructure
-    }
 
     fun getUnitNote() = when (type) {
         Simple -> {

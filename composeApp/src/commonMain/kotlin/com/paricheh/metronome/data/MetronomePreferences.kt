@@ -1,10 +1,11 @@
 package com.paricheh.metronome.data
 
+import com.paricheh.metronome.utils.Note
+import com.paricheh.metronome.utils.TimeSignature
+
 data class MetronomePreferences(
-    val tempo: Int = 120,
-    val timeSignatureBeats: Int = 4,
-    val timeSignatureBeatUnit: Int = 4,
-    val accentFirstBeat: Boolean = true,
-    val soundEnabled: Boolean = true,
-    val vibrationEnabled: Boolean = false
+    val tempo: Int,
+    val selectedTimeSignature: TimeSignature?,
+    val selectedBarStructure: List<Note>?,
+    val vibrationEnabled: Boolean,
 )

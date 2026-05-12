@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,7 +110,7 @@ fun SettingsScreen(
                             contentDescription = stringResource(Res.string.cd_back)
                         )
                     }
-                }
+                },
             )
         }
     ) { paddingValues ->
@@ -137,30 +136,10 @@ fun SettingsScreen(
 }
 
 @Composable
-@Preview
-private fun ScreenContentPreview() {
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        MetronomeTheme {
-            Box(Modifier.background(MaterialTheme.colorScheme.surface)) {
-                ScreenContent(
-                    preferences = MetronomePreferences(
-                        timeSignatureBeats = 6,
-                        timeSignatureBeatUnit = 8
-                    ),
-                    onUpdateTempo = {},
-                    onUpdateTimeSignature = { _, _ -> },
-                    onUpdateVibrationEnabled = {}
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun ScreenContent(
     preferences: MetronomePreferences,
     onUpdateTempo: (Int) -> Unit,
-    onUpdateTimeSignature: (Int, Int) -> Unit,
+    onUpdateTimeSignature: (TimeSignature?) -> Unit,
     onUpdateVibrationEnabled: (Boolean) -> Unit,
 ) {
     Column(
@@ -175,32 +154,27 @@ private fun ScreenContent(
             onTempoChange = onUpdateTempo
         )
 
-        val selectedTimeSignature by remember(
-            preferences.timeSignatureBeats,
-            preferences.timeSignatureBeatUnit
-        ) {
-            derivedStateOf {
-                TimeSignature(
-                    preferences.timeSignatureBeats,
-                    preferences.timeSignatureBeatUnit
-                ).takeIf { it.denominator != -1 || it.numerator != -1 }
-            }
-        }
-
         TimeSignatureSection(
-            selectedTimeSignature = selectedTimeSignature,
+            selectedTimeSignature = preferences.selectedTimeSignature,
             onTimeSignatureChange = onUpdateTimeSignature
         )
 
-        SwitchSetting(
-            title = stringResource(Res.string.vibration),
-            description = stringResource(Res.string.vibration_desc),
-            checked = preferences.vibrationEnabled,
-            onCheckedChange = onUpdateVibrationEnabled
-        )
+        Column(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    shape = MaterialTheme.shapes.large
+                )
+                .padding(16.dp)
+        ) {
+            SwitchSetting(
+                title = stringResource(Res.string.vibration),
+                description = stringResource(Res.string.vibration_desc),
+                checked = preferences.vibrationEnabled,
+                onCheckedChange = onUpdateVibrationEnabled
+            )
 
-        HorizontalDivider()
-
+        }
     }
 }
 
@@ -209,7 +183,15 @@ private fun TempoSection(
     tempo: Int,
     onTempoChange: (Int) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                shape = MaterialTheme.shapes.large
+            )
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -218,7 +200,7 @@ private fun TempoSection(
             Text(
                 text = stringResource(Res.string.tempo),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.primary
             )
 
             Text(
@@ -227,8 +209,6 @@ private fun TempoSection(
                 color = MaterialTheme.colorScheme.primary
             )
         }
-
-        HorizontalDivider()
 
         Slider(
             value = tempo.toFloat(),
@@ -293,9 +273,11 @@ private fun TempoSection(
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        HorizontalDivider()
+
         Text(
             text = stringResource(Res.string.detect_tempo),
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
 
@@ -331,7 +313,7 @@ private fun TempoSection(
 @Composable
 private fun TimeSignatureSection(
     selectedTimeSignature: TimeSignature?,
-    onTimeSignatureChange: (Int, Int) -> Unit,
+    onTimeSignatureChange: (TimeSignature?) -> Unit,
 ) {
     var showCustomPicker by remember { mutableStateOf(false) }
     val isCustom = remember(selectedTimeSignature) {
@@ -344,7 +326,14 @@ private fun TimeSignatureSection(
         ?.toString()
         .orEmpty()
 
-    Column {
+    Column(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                shape = MaterialTheme.shapes.large
+            )
+            .padding(16.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -352,9 +341,10 @@ private fun TimeSignatureSection(
             Text(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.time_signature),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleLarge
             )
+
             AnimatedVisibility(
                 selectedTimeSignature != null
             ) {
@@ -363,22 +353,20 @@ private fun TimeSignatureSection(
                 ) {
                     Text(
                         text = "$numeratorText\n$denominatorText",
-                        lineHeight = 17.sp,
-                        style = NonCommonTypography.musicFont,
+                        lineHeight = 12.sp,
+                        style = NonCommonTypography.musicFont2,
                         color = MaterialTheme.colorScheme.primary
                     )
 
                     Text(
                         text = MusicSymbols.G_CLEF,
-                        lineHeight = 18.sp,
+                        lineHeight = 14.sp,
                         style = NonCommonTypography.musicFontLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
         }
-
-        HorizontalDivider()
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -393,12 +381,11 @@ private fun TimeSignatureSection(
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-//            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
                 selected = selectedTimeSignature == null,
                 onClick = {
-                    onTimeSignatureChange(-1, -1)
+                    onTimeSignatureChange(null)
                     showCustomPicker = false
                 },
                 label = { Text(stringResource(Res.string.unselected)) }
@@ -410,7 +397,9 @@ private fun TimeSignatureSection(
                         && selectedTimeSignature.denominator == u
                         && !showCustomPicker,
                     onClick = {
-                        onTimeSignatureChange(b, u)
+                        onTimeSignatureChange(
+                            TimeSignature(b, u)
+                        )
                         showCustomPicker = false
                     },
                     label = { Text("$b/$u") }
@@ -430,45 +419,92 @@ private fun TimeSignatureSection(
 //            )
         }
 
-        AnimatedVisibility(
-            visible = selectedTimeSignature?.type != null
-        ) {
-            Column {
-                Spacer(Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-                val warningText = buildAnnotatedString {
-                    withStyle(
-                        MaterialTheme.typography
-                            .titleSmall
-                            .toSpanStyle()
-                            .copy(fontWeight = FontWeight.Bold)
-                    ) {
-                        append(
-                            text = if (selectedTimeSignature?.type == TimeSignatureType.Compound) {
-                                stringResource(Res.string.compund_time_signature)
-                            } else {
-                                stringResource(Res.string.irregular_time_signature)
-                            },
-                        )
-                    }
-                    appendLine()
-                    appendLine()
+        AnimatedVisibility(
+            visible = selectedTimeSignature?.type in setOf(
+                TimeSignatureType.Compound,
+                TimeSignatureType.Irregular
+            )
+        ) {
+            val warningText = buildAnnotatedString {
+                withStyle(
+                    MaterialTheme.typography
+                        .titleSmall
+                        .toSpanStyle()
+                        .copy(fontWeight = FontWeight.Bold)
+                ) {
                     append(
-                        stringResource(Res.string.message_irregular_time_signature_warning)
+                        text = if (selectedTimeSignature?.type == TimeSignatureType.Compound) {
+                            stringResource(Res.string.compund_time_signature)
+                        } else {
+                            stringResource(Res.string.irregular_time_signature)
+                        },
                     )
                 }
-
-                Text(
-                    text = warningText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.tertiary
+                appendLine()
+                appendLine()
+                append(
+                    stringResource(Res.string.message_irregular_time_signature_warning)
                 )
+            }
 
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = warningText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+        }
+
+        AnimatedVisibility(
+            selectedTimeSignature != null
+        ) {
+            LazyRow(
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainerLow,
+                        MaterialTheme.shapes.medium
+                    )
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                reverseLayout = true
+            ) {
+                items(
+                    items = selectedTimeSignature?.defaultBarsStructure
+                        .orEmpty(),
+                ) { note ->
+                    Text(
+                        modifier = Modifier.animateItem(),
+                        text = note.getUnitCharByUnit(),
+                        style = NonCommonTypography.musicFontXLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+
+        HorizontalDivider()
+
+        Spacer(Modifier.height(16.dp))
+        var shouldShowConvertTimeSignature by remember { mutableStateOf(false) }
+
+        SwitchSetting(
+            title = "تبدیل میزان",
+            description = "کسر میزان انتخاب شده می تواند به حالت های زیر نیز نمایش داده شود.",
+            checked = shouldShowConvertTimeSignature,
+            onCheckedChange = { shouldShowConvertTimeSignature = it }
+        )
+
+        repeat(2) {
+            AnimatedVisibility(shouldShowConvertTimeSignature && selectedTimeSignature != null) {
                 LazyRow(
                     modifier = Modifier
                         .padding(16.dp)
                         .background(
-                            MaterialTheme.colorScheme.tertiaryContainer,
+                            MaterialTheme.colorScheme.secondaryContainer,
                             MaterialTheme.shapes.medium
                         )
                         .fillMaxWidth(),
@@ -483,13 +519,17 @@ private fun TimeSignatureSection(
                         Text(
                             modifier = Modifier.animateItem(),
                             text = note.getUnitCharByUnit(),
-                            style = NonCommonTypography.musicFontLarge,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            style = NonCommonTypography.musicFontXLarge,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     }
                 }
             }
         }
+
+
+//        selectedTimeSignature?.getUnitNote()
+
     }
 }
 
@@ -527,6 +567,28 @@ private fun SwitchSetting(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Preview
+private fun ScreenContentPreview() {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        MetronomeTheme {
+            Box(Modifier.background(MaterialTheme.colorScheme.surface)) {
+                ScreenContent(
+                    preferences = MetronomePreferences(
+                        tempo = 120,
+                        selectedTimeSignature = TimeSignature(4, 4),
+                        selectedBarStructure = listOf(),
+                        vibrationEnabled = false
+                    ),
+                    onUpdateTempo = {},
+                    onUpdateTimeSignature = { },
+                    onUpdateVibrationEnabled = {},
+                )
+            }
+        }
+    }
+}
 
 // Custom TimeSignatureSelector Section
 //AnimatedVisibility(

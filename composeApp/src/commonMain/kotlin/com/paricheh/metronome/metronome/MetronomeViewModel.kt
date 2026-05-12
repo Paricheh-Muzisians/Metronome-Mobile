@@ -4,27 +4,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paricheh.metronome.data.MetronomeSettings
 import com.paricheh.metronome.sound.MetronomeSoundPlayer
+import com.paricheh.metronome.utils.TimeSignature
 import com.paricheh.metronome.utils.getTempoMarkingByBpm
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MetronomeViewModel(
-    private val settings: MetronomeSettings,
-    private val soundPlayer: MetronomeSoundPlayer
+    settings: MetronomeSettings,
+    private val soundPlayer: MetronomeSoundPlayer,
 ) : ViewModel() {
     private val _currentTempoBpm = MutableStateFlow(100f)
     val currentTempoBpm = _currentTempoBpm.asStateFlow()
-
-    private val _currentBeat = MutableStateFlow(1) // Track current beat (1-based)
-    val currentBeat = _currentBeat.asStateFlow()
 
     private val _currentTempoMarking = MutableStateFlow(
         getTempoMarkingByBpm(currentTempoBpm.value.toInt())
@@ -35,7 +32,6 @@ class MetronomeViewModel(
         60000 / currentTempoBpm.value
     )
     val durationInMillisecond = _durationInMillisecond.asStateFlow()
-
 
     private val _isMetronomeStarted = MutableStateFlow(false)
     val isMetronomeStarted = _isMetronomeStarted.asStateFlow()
@@ -54,6 +50,7 @@ class MetronomeViewModel(
         observeTempoMarking()
         observeDurationChanges()
         observeStartingMetronome()
+        observeSoundPlaying()
     }
 
     fun setTempo(bpm: Float) {
@@ -91,28 +88,50 @@ class MetronomeViewModel(
     private fun getDurationOnEachBeatByBpm(newTempo: Float): Float =
         60000 / newTempo
 
+    private fun observeSoundPlaying() {
+        viewModelScope.launch {
+            isMetronomeStarted.collectLatest { isStarted ->
+                if (!isStarted) return@collectLatest
+                val selectedTimeSignature = metronomePreferences.value
+                    ?.selectedTimeSignature
+
+                val barStructure = metronomePreferences.value
+                    ?.selectedBarStructure
+                    ?: selectedTimeSignature
+                        ?.defaultBarsStructure
+                        .orEmpty()
+
+                val isConvertedBar =
+                    barStructure.size != selectedTimeSignature?.defaultBarsStructure?.size
+
+                while (true) {
+                    var i = 0
+                    do {
+                        val isAccent = barStructure
+                            .getOrNull(i++)
+                            ?.isAccent
+                            ?: false
+
+                        delay(durationInMillisecond.value.toLong())
+                        soundPlayer.playTick(isAccent)
+                    } while (i <= barStructure.lastIndex)
+                }
+            }
+        }
+    }
+
     private fun observeStartingMetronome() {
         viewModelScope.launch {
             isMetronomeStarted.collectLatest { isStarted ->
-                _currentBeat.value = 1
-                while (isStarted) {
-                    val beatsPerMeasure = settings.preferences.first().timeSignatureBeats
-                    val accentEnabled = settings.preferences.first().accentFirstBeat
+                if (!isStarted) return@collectLatest
 
-                    val isAccent = accentEnabled && (_currentBeat.value == 1)
-
+                while (true) {
                     _pendulumAngle.value = if (pendulumAngle.value > 0) {
                         -25f
                     } else {
                         25f
                     }
-                    _currentBeat.value = if (_currentBeat.value >= beatsPerMeasure) {
-                        1
-                    } else {
-                        _currentBeat.value + 1
-                    }
                     delay(durationInMillisecond.value.toLong())
-                    soundPlayer.playTick(isAccent)
                 }
             }
         }

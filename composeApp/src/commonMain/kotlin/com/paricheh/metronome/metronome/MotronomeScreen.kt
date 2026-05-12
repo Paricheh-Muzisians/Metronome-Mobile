@@ -64,6 +64,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MetronomeScreen(
@@ -76,15 +77,6 @@ fun MetronomeScreen(
     val isMetronomeStarted by viewModel.isMetronomeStarted.collectAsStateWithLifecycle()
     val currentTempoMarkings by viewModel.currentTempoMarkings.collectAsStateWithLifecycle()
     val preferences by viewModel.metronomePreferences.collectAsStateWithLifecycle()
-
-    val selectedTimeSignature by remember(preferences) {
-        derivedStateOf {
-            TimeSignature(
-                preferences?.timeSignatureBeats ?: -1,
-                preferences?.timeSignatureBeatUnit ?: -1
-            ).takeIf { it.numerator != -1 || it.denominator != -1 }
-        }
-    }
 
     var metronomeBodyHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
@@ -203,15 +195,15 @@ fun MetronomeScreen(
                 val currentTempoNumber = currentBpm.toInt()
                     .toString()
 
-                selectedTimeSignature?.let {
+                preferences?.selectedTimeSignature?.let {
                     withStyle(
                         style = NonCommonTypography.musicFont.toSpanStyle()
                     ) {
                         append(it.getUnitNote().getUnitCharByUnit())
                         append("=")
-
                     }
                 }
+
                 withStyle(
                     style = NonCommonTypography.PersianSonatiNumber
                         .toSpanStyle()
@@ -229,7 +221,7 @@ fun MetronomeScreen(
             Text(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = -metronomeBodyHeight * 0.8f),
+                    .offset(y = -metronomeBodyHeight * 0.805f),
                 text = tempoText,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = NonCommonTypography.PersianSonatiLabel,

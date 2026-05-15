@@ -5,7 +5,6 @@ import android.media.SoundPool
 import com.paricheh.metronome.R
 import android.content.Context
 
-
 actual class MetronomeSoundPlayer(context: Context) {
     private val soundPool: SoundPool = SoundPool.Builder()
         .setMaxStreams(2)
@@ -35,15 +34,25 @@ actual class MetronomeSoundPlayer(context: Context) {
         }
     }
 
-    actual fun playTick(isAccent: Boolean) {
+    actual fun playTick() {
         if (!isLoaded) return
 
-        val soundId = if (isAccent) accentTickId else normalTickId
-        soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f)
+        soundPool.play(normalTickId, 1.0f, 1.0f, 1, 0, 1.0f)
     }
 
     actual fun release() {
         soundPool.release()
+    }
 
+    actual fun playAccent() {
+        if (!isLoaded) return
+
+        soundPool.play(accentTickId, 1.0f, 1.0f, 1, 0, 1.0f)
+    }
+
+    actual fun playSubBeat() {
+        if (!isLoaded) return
+
+        soundPool.play(normalTickId, 1.0f, 1.0f, 1, 0, 1.0f)
     }
 }

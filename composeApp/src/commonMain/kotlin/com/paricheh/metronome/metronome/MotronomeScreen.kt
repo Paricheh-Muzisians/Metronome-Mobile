@@ -34,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +52,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
 import com.paricheh.metronome.theme.NonCommonTypography
-import com.paricheh.metronome.utils.TimeSignature
 import com.paricheh.metronome.utils.titleEnglish
 import com.paricheh.metronome.utils.titlePersian
 import metronome.composeapp.generated.resources.Res

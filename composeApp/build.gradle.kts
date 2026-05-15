@@ -54,6 +54,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlin.serialization)
             implementation(libs.setting)
+            implementation(libs.unstyled)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

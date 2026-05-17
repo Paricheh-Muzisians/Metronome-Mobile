@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,12 +45,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -59,17 +64,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.composables.core.SheetDetent
+import com.composables.core.rememberModalBottomSheetState
 import com.paricheh.metronome.data.MetronomePreferences
+import com.paricheh.metronome.settings.component.ConvertBarSectionPicker
+import com.paricheh.metronome.settings.component.CustomTimeSignaturePicker
 import com.paricheh.metronome.theme.MetronomeTheme
 import com.paricheh.metronome.theme.NonCommonTypography
 import com.paricheh.metronome.utils.MusicSymbols
+import com.paricheh.metronome.utils.Note
 import com.paricheh.metronome.utils.TimeSignature
 import com.paricheh.metronome.utils.TimeSignatureType
+import kotlinx.coroutines.launch
 import metronome.composeapp.generated.resources.Res
 import metronome.composeapp.generated.resources.bpm_format
 import metronome.composeapp.generated.resources.cd_back
 import metronome.composeapp.generated.resources.cd_decrease_tempo
 import metronome.composeapp.generated.resources.compund_time_signature
+import metronome.composeapp.generated.resources.custom
 import metronome.composeapp.generated.resources.decrement
 import metronome.composeapp.generated.resources.detect_tempo
 import metronome.composeapp.generated.resources.detect_tempo_message
@@ -95,7 +107,77 @@ fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
+    val scope = rememberCoroutineScope()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val selectedTimeSignature = preferences?.selectedTimeSignature
+
+    val barStructurePickerSheetState = rememberModalBottomSheetState(SheetDetent.Hidden)
+    val customTimeSignaturePickerSheetState = rememberModalBottomSheetState(SheetDetent.Hidden)
+
+    CustomTimeSignaturePicker(
+        state = customTimeSignaturePickerSheetState,
+        onDismiss = {
+            scope.launch {
+                customTimeSignaturePickerSheetState.animateTo(SheetDetent.Hidden)
+            }
+        },
+        onConfirm = {
+            scope.launch {
+                viewModel.updateTimeSignature(it)
+                customTimeSignaturePickerSheetState.animateTo(SheetDetent.Hidden)
+            }
+        }
+    )
+
+
+    var selectedNote: Note? by remember {
+        mutableStateOf(
+            selectedTimeSignature?.defaultBarsStructure
+                ?.lastOrNull()
+        )
+    }
+    val availableNotes by remember(selectedTimeSignature) {
+        derivedStateOf {
+            Note.validNoteWeights
+                .filter {
+                    (selectedTimeSignature?.defaultBarsStructure
+                        ?.lastOrNull()
+                        ?.weight
+                        ?: -1
+                        ) <= it
+                }
+                .map {
+                    Note(it)
+                }
+        }
+    }
+
+    ConvertBarSectionPicker(
+        state = barStructurePickerSheetState,
+        title = "انتخاب نت",
+        description = "انتخاب کنید کسر میزان به پایه چه نتی میخواهد تبدیل شود.",
+        onDismiss = {
+            scope.launch {
+                barStructurePickerSheetState.animateTo(SheetDetent.Hidden)
+            }
+        },
+        items = availableNotes,
+        provideValue = {
+            selectedNote ?: Note(4)
+        },
+        onValueChange = {
+            selectedNote = it
+        },
+        modifier = Modifier.fillMaxWidth(),
+        label = {
+            it.getUnitCharByUnit()
+        },
+        onConfirm = {
+            scope.launch {
+                barStructurePickerSheetState.animateTo(SheetDetent.Hidden)
+            }
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -129,6 +211,16 @@ fun SettingsScreen(
                     onUpdateTempo = viewModel::updateTempo,
                     onUpdateTimeSignature = viewModel::updateTimeSignature,
                     onUpdateVibrationEnabled = viewModel::updateVibrationEnabled,
+                    onOpenConvertBarStructurePicker = {
+                        scope.launch {
+                            barStructurePickerSheetState.animateTo(SheetDetent.FullyExpanded)
+                        }
+                    },
+                    onOpenCustomTimeSignaturePicker = {
+                        scope.launch {
+                            customTimeSignaturePickerSheetState.animateTo(SheetDetent.FullyExpanded)
+                        }
+                    }
                 )
             }
         }
@@ -141,6 +233,8 @@ private fun ScreenContent(
     onUpdateTempo: (Int) -> Unit,
     onUpdateTimeSignature: (TimeSignature?) -> Unit,
     onUpdateVibrationEnabled: (Boolean) -> Unit,
+    onOpenConvertBarStructurePicker: () -> Unit,
+    onOpenCustomTimeSignaturePicker: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -156,7 +250,10 @@ private fun ScreenContent(
 
         TimeSignatureSection(
             selectedTimeSignature = preferences.selectedTimeSignature,
-            onTimeSignatureChange = onUpdateTimeSignature
+            onTimeSignatureChange = onUpdateTimeSignature,
+            convertedBarStructure = preferences.selectedTimeSignature?.defaultBarsStructure,
+            onOpenConvertBarStructurePicker = onOpenConvertBarStructurePicker,
+            onOpenCustomTimeSignaturePicker = onOpenCustomTimeSignaturePicker,
         )
 
         Column(
@@ -313,12 +410,11 @@ private fun TempoSection(
 @Composable
 private fun TimeSignatureSection(
     selectedTimeSignature: TimeSignature?,
+    convertedBarStructure: List<Note>?,
     onTimeSignatureChange: (TimeSignature?) -> Unit,
+    onOpenConvertBarStructurePicker: () -> Unit,
+    onOpenCustomTimeSignaturePicker: () -> Unit,
 ) {
-    var showCustomPicker by remember { mutableStateOf(false) }
-    val isCustom = remember(selectedTimeSignature) {
-        selectedTimeSignature?.isCommon() ?: false
-    }
     val numeratorText = selectedTimeSignature?.numerator
         ?.toString()
         .orEmpty()
@@ -386,7 +482,6 @@ private fun TimeSignatureSection(
                 selected = selectedTimeSignature == null,
                 onClick = {
                     onTimeSignatureChange(null)
-                    showCustomPicker = false
                 },
                 label = { Text(stringResource(Res.string.unselected)) }
             )
@@ -394,29 +489,26 @@ private fun TimeSignatureSection(
             TimeSignature.commonTimeSignatures.forEach { (b, u) ->
                 FilterChip(
                     selected = selectedTimeSignature?.numerator == b
-                        && selectedTimeSignature.denominator == u
-                        && !showCustomPicker,
-                    onClick = {
+                        && selectedTimeSignature.denominator == u, onClick = {
                         onTimeSignatureChange(
                             TimeSignature(b, u)
                         )
-                        showCustomPicker = false
                     },
                     label = { Text("$b/$u") }
                 )
             }
 
-//            FilterChip(
-//                selected = showCustomPicker || (isCustom && !showCustomPicker),
-//                onClick = { showCustomPicker = !showCustomPicker },
-//                label = {
-//                    Text(
-//                        if (isCustom && !showCustomPicker)
-//                            "$numeratorText/$denominatorText"
-//                        else stringResource(Res.string.custom)
-//                    )
-//                }
-//            )
+
+            FilterChip(
+                selected = selectedTimeSignature != null &&
+                    !TimeSignature.commonTimeSignatures.contains(
+                        numeratorText.toIntOrNull() to denominatorText.toIntOrNull()
+                    ),
+                onClick = onOpenCustomTimeSignaturePicker,
+                label = {
+                    Text(stringResource(Res.string.custom))
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -489,6 +581,7 @@ private fun TimeSignatureSection(
         HorizontalDivider()
 
         Spacer(Modifier.height(16.dp))
+
         var shouldShowConvertTimeSignature by remember { mutableStateOf(false) }
 
         SwitchSetting(
@@ -498,37 +591,71 @@ private fun TimeSignatureSection(
             onCheckedChange = { shouldShowConvertTimeSignature = it }
         )
 
-        repeat(2) {
-            AnimatedVisibility(shouldShowConvertTimeSignature && selectedTimeSignature != null) {
-                LazyRow(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .background(
-                            MaterialTheme.colorScheme.secondaryContainer,
-                            MaterialTheme.shapes.medium
-                        )
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    reverseLayout = true
-                ) {
-                    items(
-                        items = selectedTimeSignature?.defaultBarsStructure
-                            .orEmpty(),
-                    ) { note ->
-                        Text(
-                            modifier = Modifier.animateItem(),
-                            text = note.getUnitCharByUnit(),
-                            style = NonCommonTypography.musicFontXLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        )
-                    }
-                }
+        Spacer(Modifier.height(16.dp))
+
+        val initialBarStructureNoteUnit by remember(selectedTimeSignature) {
+            derivedStateOf {
+                selectedTimeSignature?.defaultBarsStructure
+                    ?.lastOrNull()
+                    ?.getUnitCharByUnit()
+                    .orEmpty()
             }
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.small)
+                .clickable {
+                    onOpenConvertBarStructurePicker()
+                }
+                .border(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    width = 1.dp,
+                    shape = MaterialTheme.shapes.medium,
+                )
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "انتخاب نوت پایه",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
-//        selectedTimeSignature?.getUnitNote()
+            Text(
+                text = initialBarStructureNoteUnit,
+                style = NonCommonTypography.musicFont,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+
+        AnimatedVisibility(shouldShowConvertTimeSignature && selectedTimeSignature != null) {
+            LazyRow(
+                modifier = Modifier
+                    .padding(vertical = 16.dp)
+                    .background(
+                        MaterialTheme.colorScheme.secondaryContainer,
+                        MaterialTheme.shapes.medium
+                    )
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                reverseLayout = true
+            ) {
+                items(
+                    items = convertedBarStructure.orEmpty(),
+                ) { note ->
+                    Text(
+                        modifier = Modifier.animateItem(),
+                        text = note.getUnitCharByUnit(),
+                        style = NonCommonTypography.musicFontXLarge,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+            }
+        }
 
     }
 }
@@ -584,201 +711,10 @@ private fun ScreenContentPreview() {
                     onUpdateTempo = {},
                     onUpdateTimeSignature = { },
                     onUpdateVibrationEnabled = {},
+                    onOpenConvertBarStructurePicker = {},
+                    onOpenCustomTimeSignaturePicker = {}
                 )
             }
         }
     }
 }
-
-// Custom TimeSignatureSelector Section
-//AnimatedVisibility(
-//visible = showCustomPicker,
-//enter = expandVertically() + fadeIn(),
-//exit = shrinkVertically() + fadeOut()
-//) {
-//    Card(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(top = 4.dp),
-//        colors = CardDefaults.cardColors(
-//            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-//        ),
-//        elevation = CardDefaults.cardElevation(
-//            defaultElevation = 2.dp
-//        ),
-//        shape = MaterialTheme.shapes.medium
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(20.dp),
-//            verticalArrangement = Arrangement.spacedBy(16.dp)
-//        ) {
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Text(
-//                    text = stringResource(Res.string.custom_time_signature),
-//                    style = MaterialTheme.typography.titleSmall,
-//                    fontWeight = FontWeight.SemiBold
-//                )
-//
-//                Text(
-//                    text = "/${selectedTimeSignature?.denominator}",
-//                    style = MaterialTheme.typography.titleMedium,
-//                    color = MaterialTheme.colorScheme.primary,
-//                    fontWeight = FontWeight.Bold
-//                )
-//            }
-//
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.spacedBy(12.dp)
-//            ) {
-//                // Beats per measure
-//                Column(
-//                    modifier = Modifier.weight(1f),
-//                    verticalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    Text(
-//                        text = stringResource(Res.string.beats),
-//                        style = MaterialTheme.typography.labelLarge,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//
-//                    var expanded by remember { mutableStateOf(false) }
-//
-//                    ExposedDropdownMenuBox(
-//                        expanded = expanded,
-//                        onExpandedChange = { expanded = it }
-//                    ) {
-//                        OutlinedTextField(
-//                            value = selectedTimeSignature.toString(),
-//                            onValueChange = {},
-//                            readOnly = true,
-//                            textStyle = MaterialTheme.typography.titleMedium.copy(
-//                                fontWeight = FontWeight.SemiBold,
-//                                textAlign = TextAlign.Center
-//                            ),
-//                            trailingIcon = {
-//                                ExposedDropdownMenuDefaults.TrailingIcon(
-//                                    expanded = expanded
-//                                )
-//                            },
-//                            colors = OutlinedTextFieldDefaults.colors(
-//                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-//                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
-//                                    alpha = 0.5f
-//                                )
-//                            ),
-//                            modifier = Modifier
-//                                .menuAnchor()
-//                                .fillMaxWidth()
-//                        )
-//
-//                        ExposedDropdownMenu(
-//                            expanded = expanded,
-//                            onDismissRequest = { expanded = false },
-//                            modifier = Modifier.heightIn(max = 300.dp)
-//                        ) {
-//                            (1..12).forEach { beat ->
-//                                DropdownMenuItem(
-//                                    text = {
-//                                        Text(
-//                                            beat.toString(),
-//                                            style = MaterialTheme.typography.bodyLarge,
-//                                            fontWeight = if (beat == selectedTimeSignature?.denominator)
-//                                                FontWeight.Bold else FontWeight.Normal
-//                                        )
-//                                    },
-//                                    onClick = {
-//                                        onTimeSignatureChange(
-//                                            beat,
-//                                            selectedTimeSignature?.denominator ?: -1
-//                                        )
-//                                        expanded = false
-//                                    },
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                // Beat unit
-//                Column(
-//                    modifier = Modifier.weight(1f),
-//                    verticalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    Text(
-//                        text = stringResource(Res.string.unit),
-//                        style = MaterialTheme.typography.labelLarge,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                    )
-//
-//                    var expanded by remember { mutableStateOf(false) }
-//                    val beatUnits = listOf(2, 4, 8, 16)
-//
-//                    ExposedDropdownMenuBox(
-//                        expanded = expanded,
-//                        onExpandedChange = { expanded = it }
-//                    ) {
-//                        OutlinedTextField(
-//                            value = beatUnit.toString(),
-//                            onValueChange = {},
-//                            readOnly = true,
-//                            textStyle = MaterialTheme.typography.titleMedium.copy(
-//                                fontWeight = FontWeight.SemiBold,
-//                                textAlign = TextAlign.Center
-//                            ),
-//                            trailingIcon = {
-//                                ExposedDropdownMenuDefaults.TrailingIcon(
-//                                    expanded = expanded
-//                                )
-//                            },
-//                            colors = OutlinedTextFieldDefaults.colors(
-//                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-//                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
-//                                    alpha = 0.5f
-//                                )
-//                            ),
-//                            shape = RoundedCornerShape(12.dp),
-//                            modifier = Modifier
-//                                .menuAnchor()
-//                                .fillMaxWidth()
-//                        )
-//
-//                        ExposedDropdownMenu(
-//                            expanded = expanded,
-//                            onDismissRequest = { expanded = false }
-//                        ) {
-//                            beatUnits.forEach { unit ->
-//                                DropdownMenuItem(
-//                                    text = {
-//                                        Text(
-//                                            unit.toString(),
-//                                            style = MaterialTheme.typography.bodyLarge,
-//                                            fontWeight = if (unit == beatUnit) FontWeight.Bold else FontWeight.Normal
-//                                        )
-//                                    },
-//                                    onClick = {
-//                                        onTimeSignatureChange(beats, unit)
-//                                        expanded = false
-//                                    },
-//
-//                                    colors = MenuDefaults.itemColors(
-//                                        textColor = if (unit == beatUnit)
-//                                            MaterialTheme.colorScheme.primary
-//                                        else
-//                                            MaterialTheme.colorScheme.onSurface
-//                                    )
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}

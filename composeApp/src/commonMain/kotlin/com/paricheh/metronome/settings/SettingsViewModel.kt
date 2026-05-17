@@ -4,15 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paricheh.metronome.data.MetronomePreferences
 import com.paricheh.metronome.data.MetronomeSettings
+import com.paricheh.metronome.utils.Note
 import com.paricheh.metronome.utils.TimeSignature
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val settings: MetronomeSettings
+    private val settings: MetronomeSettings,
 ) : ViewModel() {
+    private val _convertedBarStructure = MutableStateFlow<List<Note>?>(null)
+    val convertedBarStructure = _convertedBarStructure.asStateFlow()
 
     val preferences: StateFlow<MetronomePreferences?> = settings.preferences
         .stateIn(
@@ -36,6 +41,12 @@ class SettingsViewModel(
     fun updateVibrationEnabled(enabled: Boolean) {
         viewModelScope.launch {
             settings.updateVibrationEnabled(enabled)
+        }
+    }
+
+    fun updateBarStructure(selectedBarStructure: List<Note>?) {
+        viewModelScope.launch {
+            settings.updateBarStructure(selectedBarStructure)
         }
     }
 }

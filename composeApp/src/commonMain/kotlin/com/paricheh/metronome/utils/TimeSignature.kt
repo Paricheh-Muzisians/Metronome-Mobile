@@ -1,9 +1,6 @@
 package com.paricheh.metronome.utils
 
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.paricheh.metronome.utils.TimeSignatureType.Compound
 import com.paricheh.metronome.utils.TimeSignatureType.Irregular
 import com.paricheh.metronome.utils.TimeSignatureType.Simple
@@ -53,19 +50,21 @@ class TimeSignature(
             }
 
             Irregular -> {
-                List(numerator / 3) {
+                var numberOfDotedNote = numerator % denominator
+
+                List((numerator / 3) + 1) {
                     Note(
                         weight = denominator / 2,
-                        isAccent = it == 0,
-                        isDot = it == numerator / 3 - 1
+                        isAccent = it == numerator / 3,
+                        isDot = numberOfDotedNote-- > 0
                     )
-                }
+                }.reversed()
             }
         }
     }
 
     private fun calculateType(): TimeSignatureType {
-        if (denominator == 8 && numerator % 3 == 0 && numerator > 3) {
+        if (denominator % 2 == 0 && numerator % 3 == 0) {
             return Compound
         }
 
@@ -78,9 +77,6 @@ class TimeSignature(
 
         return Irregular
     }
-
-    fun isCommon() =
-        numerator to denominator in commonTimeSignatures
 
     companion object {
         val commonTimeSignatures = setOf(

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paricheh.metronome.data.MetronomeSettings
 import com.paricheh.metronome.sound.MetronomeSoundPlayer
-import com.paricheh.metronome.utils.TimeSignature
 import com.paricheh.metronome.utils.getTempoMarkingByBpm
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -95,26 +94,49 @@ class MetronomeViewModel(
                 val selectedTimeSignature = metronomePreferences.value
                     ?.selectedTimeSignature
 
-                val barStructure = metronomePreferences.value
+                val actualBarStructure = selectedTimeSignature
+                    ?.defaultBarsStructure
+                    .orEmpty()
+
+                val convertedBarStructure = metronomePreferences.value
                     ?.selectedBarStructure
-                    ?: selectedTimeSignature
-                        ?.defaultBarsStructure
-                        .orEmpty()
+                    .orEmpty()
 
                 val isConvertedBar =
-                    barStructure.size != selectedTimeSignature?.defaultBarsStructure?.size
+                    convertedBarStructure.size != actualBarStructure.size
+
+                // compound mode
+                // actual.size = 3 _ _ _
+                // converted.size = 6 '' '' ''
+
+                // 2 times more than actual for each beat
+                val convertedDivision =
+                    convertedBarStructure.size / actualBarStructure.size
+
+                val durationForConverted =
+                    durationInMillisecond.value / convertedDivision
+
 
                 while (true) {
                     var i = 0
                     do {
-                        val isAccent = barStructure
+                        repeat(convertedDivision - 1) {
+                            delay(durationForConverted.toLong())
+                            soundPlayer.playSubBeat()
+                        }
+
+                        val isAccent = actualBarStructure
                             .getOrNull(i++)
                             ?.isAccent
                             ?: false
 
-                        delay(durationInMillisecond.value.toLong())
-                        soundPlayer.playTick(isAccent)
-                    } while (i <= barStructure.lastIndex)
+                        if (isAccent) {
+                            soundPlayer.playAccent()
+                        } else {
+                            soundPlayer.playTick()
+                        }
+
+                    } while (i <= actualBarStructure.lastIndex)
                 }
             }
         }

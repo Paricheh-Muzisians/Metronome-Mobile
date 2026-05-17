@@ -5,6 +5,8 @@ package com.paricheh.metronome.sound
  * Plays two different tones: normal tick and accented tick.
  */
 expect class MetronomeSoundPlayer {
-    fun playTick(isAccent: Boolean)
+    fun playTick()
+    fun playAccent()
+    fun playSubBeat()
     fun release()
 }

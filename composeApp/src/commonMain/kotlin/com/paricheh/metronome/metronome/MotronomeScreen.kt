@@ -15,7 +15,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -166,7 +165,7 @@ fun MetronomeScreen(
                 }
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    modifier = Modifier.padding(top = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     val musicianTempoText = buildAnnotatedString {
@@ -175,7 +174,7 @@ fun MetronomeScreen(
 
                     Text(
                         text = musicianTempoText,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = NonCommonTypography.EnglishSontatiHeader,
                     )
 

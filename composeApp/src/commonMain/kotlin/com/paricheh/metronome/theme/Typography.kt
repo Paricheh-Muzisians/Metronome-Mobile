@@ -43,7 +43,7 @@ val natoMusicFont: FontFamily
 object NonCommonTypography {
     val PersianSonatiHeader
         @Composable
-        get() = Typography().titleLarge.copy(
+        get() = Typography().titleMedium.copy(
             fontFamily = gulzarFont,
             textAlign = TextAlign.Center,
             baselineShift = BaselineShift.Subscript,

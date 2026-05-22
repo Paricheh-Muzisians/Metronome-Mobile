@@ -588,6 +588,7 @@ private fun TimeSignatureSection(
             title = stringResource(Res.string.convert_bar),
             description = stringResource(Res.string.convert_bar_message),
             checked = shouldShowConvertTimeSignature,
+            enabled = selectedTimeSignature != null,
             onCheckedChange = {
                 if (!it) {
                     onSetConvertBarStructureReset()
@@ -669,6 +670,7 @@ private fun SwitchSetting(
     title: String,
     description: String,
     checked: Boolean,
+    enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -695,6 +697,7 @@ private fun SwitchSetting(
 
         Switch(
             checked = checked,
+            enabled = enabled,
             onCheckedChange = onCheckedChange
         )
     }

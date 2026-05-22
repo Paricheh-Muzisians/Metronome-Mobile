@@ -14,6 +14,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,20 +29,23 @@ import com.composables.core.ModalBottomSheetState
 import com.composables.core.Scrim
 import com.composables.core.Sheet
 import com.paricheh.metronome.theme.NonCommonTypography
+import com.paricheh.metronome.utils.Note
 
 @Composable
-fun <T> ConvertBarSectionPicker(
+fun ConvertBarPicker(
     state: ModalBottomSheetState,
-    title: String,
-    items: List<T>,
-    description: String? = null,
+    currentConvertedUnit: Note?,
+    currentTimeSignatureUnit: Note,
     onDismiss: () -> Unit,
-    provideValue: () -> T,
-    onValueChange: (T) -> Unit,
     modifier: Modifier = Modifier,
-    label: (T) -> String = { it.toString() },
-    onConfirm: () -> Unit,
+    onConfirm: (Note) -> Unit,
 ) {
+    var selectedNote by remember {
+        mutableStateOf(
+            currentConvertedUnit ?: currentTimeSignatureUnit
+        )
+    }
+
     ModalBottomSheet(
         state = state,
         onDismiss = onDismiss
@@ -57,29 +64,31 @@ fun <T> ConvertBarSectionPicker(
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        text = title,
+                        text = "انتخاب نت",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    description?.let {
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = it,
-                            modifier = Modifier.padding(horizontal = 20.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(
+                        text = "انتخاب کنید کسر میزان به پایه چه نتی میخواهد تبدیل شود.",
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
                     Spacer(Modifier.height(16.dp))
 
                     HorizontalWheelPicker(
-                        items = items,
-                        provideValue = provideValue,
-                        onValueChange = onValueChange,
+                        items = Note.validNoteWeights
+                            .filter { it >= currentTimeSignatureUnit.weight }
+                            .map { Note(it) }
+                            .toList(),
+                        provideValue = { selectedNote },
+                        onValueChange = { selectedNote = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = label,
+                        label = { it.getUnitCharByUnit() },
                         dividersColor = Color.Transparent,
                         textStyle = NonCommonTypography.musicFontLarge,
                     )
@@ -96,7 +105,7 @@ fun <T> ConvertBarSectionPicker(
                         Button(
                             modifier = Modifier
                                 .weight(1f),
-                            onClick = onConfirm,
+                            onClick = { onConfirm(selectedNote) },
                         ) {
                             Text("تایید")
                         }

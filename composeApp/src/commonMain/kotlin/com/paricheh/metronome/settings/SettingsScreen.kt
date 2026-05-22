@@ -67,7 +67,7 @@ import androidx.navigation.NavController
 import com.composables.core.SheetDetent
 import com.composables.core.rememberModalBottomSheetState
 import com.paricheh.metronome.data.MetronomePreferences
-import com.paricheh.metronome.settings.component.ConvertBarSectionPicker
+import com.paricheh.metronome.settings.component.ConvertBarPicker
 import com.paricheh.metronome.settings.component.CustomTimeSignaturePicker
 import com.paricheh.metronome.theme.MetronomeTheme
 import com.paricheh.metronome.theme.NonCommonTypography
@@ -129,51 +129,26 @@ fun SettingsScreen(
         }
     )
 
-
-    var selectedNote: Note? by remember {
-        mutableStateOf(
-            selectedTimeSignature?.defaultBarsStructure
-                ?.lastOrNull()
-        )
-    }
-    val availableNotes by remember(selectedTimeSignature) {
-        derivedStateOf {
-            Note.validNoteWeights
-                .filter {
-                    (selectedTimeSignature?.defaultBarsStructure
-                        ?.lastOrNull()
-                        ?.weight
-                        ?: -1
-                        ) <= it
-                }
-                .map {
-                    Note(it)
-                }
-        }
-    }
-
-    ConvertBarSectionPicker(
+    ConvertBarPicker(
         state = barStructurePickerSheetState,
-        title = "انتخاب نت",
-        description = "انتخاب کنید کسر میزان به پایه چه نتی میخواهد تبدیل شود.",
+        currentConvertedUnit = preferences?.selectedBarStructure
+            ?.lastOrNull(),
+        currentTimeSignatureUnit = selectedTimeSignature?.defaultBarsStructure
+            ?.lastOrNull()
+            ?: Note(4),
         onDismiss = {
             scope.launch {
                 barStructurePickerSheetState.animateTo(SheetDetent.Hidden)
             }
         },
-        items = availableNotes,
-        provideValue = {
-            selectedNote ?: Note(4)
-        },
-        onValueChange = {
-            selectedNote = it
-        },
         modifier = Modifier.fillMaxWidth(),
-        label = {
-            it.getUnitCharByUnit()
-        },
         onConfirm = {
             scope.launch {
+                if (it == selectedTimeSignature?.defaultBarsStructure?.lastOrNull()) {
+                    viewModel.convertBarStructure(null)
+                } else {
+                    viewModel.convertBarStructure(it)
+                }
                 barStructurePickerSheetState.animateTo(SheetDetent.Hidden)
             }
         }
@@ -220,6 +195,9 @@ fun SettingsScreen(
                         scope.launch {
                             customTimeSignaturePickerSheetState.animateTo(SheetDetent.FullyExpanded)
                         }
+                    },
+                    onSetConvertBarStructureReset = {
+                        viewModel.convertBarStructure(null)
                     }
                 )
             }
@@ -235,6 +213,7 @@ private fun ScreenContent(
     onUpdateVibrationEnabled: (Boolean) -> Unit,
     onOpenConvertBarStructurePicker: () -> Unit,
     onOpenCustomTimeSignaturePicker: () -> Unit,
+    onSetConvertBarStructureReset: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -251,9 +230,10 @@ private fun ScreenContent(
         TimeSignatureSection(
             selectedTimeSignature = preferences.selectedTimeSignature,
             onTimeSignatureChange = onUpdateTimeSignature,
-            convertedBarStructure = preferences.selectedTimeSignature?.defaultBarsStructure,
+            convertedBarStructure = preferences.selectedBarStructure,
             onOpenConvertBarStructurePicker = onOpenConvertBarStructurePicker,
             onOpenCustomTimeSignaturePicker = onOpenCustomTimeSignaturePicker,
+            onSetConvertBarStructureReset = onSetConvertBarStructureReset
         )
 
         Column(
@@ -414,6 +394,7 @@ private fun TimeSignatureSection(
     onTimeSignatureChange: (TimeSignature?) -> Unit,
     onOpenConvertBarStructurePicker: () -> Unit,
     onOpenCustomTimeSignaturePicker: () -> Unit,
+    onSetConvertBarStructureReset: () -> Unit,
 ) {
     val numeratorText = selectedTimeSignature?.numerator
         ?.toString()
@@ -489,7 +470,8 @@ private fun TimeSignatureSection(
             TimeSignature.commonTimeSignatures.forEach { (b, u) ->
                 FilterChip(
                     selected = selectedTimeSignature?.numerator == b
-                        && selectedTimeSignature.denominator == u, onClick = {
+                        && selectedTimeSignature.denominator == u,
+                    onClick = {
                         onTimeSignatureChange(
                             TimeSignature(b, u)
                         )
@@ -582,81 +564,94 @@ private fun TimeSignatureSection(
 
         Spacer(Modifier.height(16.dp))
 
-        var shouldShowConvertTimeSignature by remember { mutableStateOf(false) }
+        var shouldShowConvertTimeSignature by remember {
+            mutableStateOf(convertedBarStructure != null)
+        }
 
         SwitchSetting(
             title = "تبدیل میزان",
-            description = "کسر میزان انتخاب شده می تواند به حالت های زیر نیز نمایش داده شود.",
+            description = "با قابلیت تبدیل میزان می توانید ساختار میزان را تبدیل کرده و نت های کوچک تر را به صورت Sub Beat پخش کنید.",
             checked = shouldShowConvertTimeSignature,
-            onCheckedChange = { shouldShowConvertTimeSignature = it }
+            onCheckedChange = {
+                if (!it) {
+                    onSetConvertBarStructureReset()
+                }
+                shouldShowConvertTimeSignature = it
+            }
         )
 
-        Spacer(Modifier.height(16.dp))
-
-        val initialBarStructureNoteUnit by remember(selectedTimeSignature) {
-            derivedStateOf {
-                selectedTimeSignature?.defaultBarsStructure
-                    ?.lastOrNull()
-                    ?.getUnitCharByUnit()
-                    .orEmpty()
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.small)
-                .clickable {
-                    onOpenConvertBarStructurePicker()
-                }
-                .border(
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    width = 1.dp,
-                    shape = MaterialTheme.shapes.medium,
-                )
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = "انتخاب نوت پایه",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Text(
-                text = initialBarStructureNoteUnit,
-                style = NonCommonTypography.musicFont,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-
-        AnimatedVisibility(shouldShowConvertTimeSignature && selectedTimeSignature != null) {
-            LazyRow(
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .background(
-                        MaterialTheme.colorScheme.secondaryContainer,
-                        MaterialTheme.shapes.medium
-                    )
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                reverseLayout = true
+        AnimatedVisibility(shouldShowConvertTimeSignature) {
+            val barStructureNoteUnit by remember(
+                selectedTimeSignature,
+                convertedBarStructure
             ) {
-                items(
-                    items = convertedBarStructure.orEmpty(),
-                ) { note ->
+                derivedStateOf {
+                    (convertedBarStructure ?: selectedTimeSignature?.defaultBarsStructure)
+                        ?.lastOrNull()
+                        ?.getUnitCharByUnit()
+                        .orEmpty()
+                }
+            }
+
+            Column {
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable {
+                            onOpenConvertBarStructurePicker()
+                        }
+                        .border(
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            width = 1.dp,
+                            shape = MaterialTheme.shapes.medium,
+                        )
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
                     Text(
-                        modifier = Modifier.animateItem(),
-                        text = note.getUnitCharByUnit(),
-                        style = NonCommonTypography.musicFontXLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        text = "انتخاب نوت پایه",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+
+                    Text(
+                        text = barStructureNoteUnit,
+                        style = NonCommonTypography.musicFont,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                AnimatedVisibility(convertedBarStructure != null) {
+                    LazyRow(
+                        modifier = Modifier
+                            .padding(vertical = 16.dp)
+                            .background(
+                                MaterialTheme.colorScheme.secondaryContainer,
+                                MaterialTheme.shapes.medium
+                            )
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        reverseLayout = true
+                    ) {
+                        items(
+                            items = convertedBarStructure.orEmpty(),
+                        ) { note ->
+                            Text(
+                                modifier = Modifier.animateItem(),
+                                text = note.getUnitCharByUnit(),
+                                style = NonCommonTypography.musicFontXLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            )
+                        }
+                    }
                 }
             }
         }
-
     }
 }
 
@@ -712,7 +707,7 @@ private fun ScreenContentPreview() {
                     onUpdateTimeSignature = { },
                     onUpdateVibrationEnabled = {},
                     onOpenConvertBarStructurePicker = {},
-                    onOpenCustomTimeSignaturePicker = {}
+                    onOpenCustomTimeSignaturePicker = {}, {}
                 )
             }
         }

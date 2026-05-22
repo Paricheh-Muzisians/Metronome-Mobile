@@ -6,25 +6,34 @@ import com.paricheh.metronome.data.MetronomePreferences
 import com.paricheh.metronome.data.MetronomeSettings
 import com.paricheh.metronome.utils.Note
 import com.paricheh.metronome.utils.TimeSignature
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settings: MetronomeSettings,
 ) : ViewModel() {
-    private val _convertedBarStructure = MutableStateFlow<List<Note>?>(null)
-    val convertedBarStructure = _convertedBarStructure.asStateFlow()
-
     val preferences: StateFlow<MetronomePreferences?> = settings.preferences
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
+
+    init {
+        preferences
+            .map { it?.selectedTimeSignature to it?.selectedBarStructure }
+            .distinctUntilChanged()
+            .onEach { (timeSignature, barStruct) ->
+                if (timeSignature != null || barStruct != null)
+                    convertBarStructure(barStruct?.firstOrNull())
+            }.launchIn(viewModelScope)
+    }
 
     fun updateTempo(tempo: Int) {
         viewModelScope.launch {
@@ -44,9 +53,31 @@ class SettingsViewModel(
         }
     }
 
-    fun updateBarStructure(selectedBarStructure: List<Note>?) {
+    fun convertBarStructure(unit: Note?) {
         viewModelScope.launch {
-            settings.updateBarStructure(selectedBarStructure)
+
+            val defaultBarStructure = preferences.value
+                ?.selectedTimeSignature
+                ?.defaultBarsStructure
+
+            if (unit == null || defaultBarStructure == null) {
+                return@launch settings.updateBarStructure(null)
+            }
+
+            val convertedBarStructure = defaultBarStructure.flatMap { note ->
+                buildList {
+                    repeat(unit.weight / note.weight) {
+                        add(unit)
+                    }
+                    if (note.isDot) {
+                        repeat(unit.weight / note.weight / 2) {
+                            add(unit)
+                        }
+                    }
+                }
+            }
+
+            settings.updateBarStructure(convertedBarStructure)
         }
     }
 }

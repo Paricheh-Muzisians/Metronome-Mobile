@@ -50,29 +50,48 @@ class TimeSignature(
             }
 
             Irregular -> {
-                var numberOfDotedNote = numerator % denominator
+                var numberOfDotedNote = 0
 
-                List((numerator / 3) + 1) {
-                    Note(
-                        weight = denominator / 2,
-                        isAccent = it == numerator / 3,
-                        isDot = numberOfDotedNote-- > 0
-                    )
-                }.reversed()
+                List(numerator) {
+                    Note(denominator)
+                }.chunked(2)
+                    .map {
+                        if (it.size == 1) {
+                            numberOfDotedNote++
+                        }
+
+                        Note(denominator / 2)
+                    }
+                    .toMutableList()
+                    .apply {
+                        repeat(numberOfDotedNote) {
+                            removeLast()
+                            removeLast()
+                        }
+
+                        repeat(numberOfDotedNote) {
+                            add(
+                                first().copy(
+                                    isDot = true,
+                                    isAccent = false
+                                )
+                            )
+                        }
+                    }
             }
         }
     }
 
     private fun calculateType(): TimeSignatureType {
-        if (denominator % 2 == 0 && numerator % 3 == 0) {
-            return Compound
-        }
-
         val simpleDenominators = setOf(2, 4, 8)
-        val simpleNumerators = setOf(2, 3, 4)
+        val simpleNumerators = setOf(1, 2, 3, 4)
 
         if (denominator in simpleDenominators && numerator in simpleNumerators) {
             return Simple
+        }
+
+        if (denominator % 2 == 0 && numerator % 3 == 0) {
+            return Compound
         }
 
         return Irregular

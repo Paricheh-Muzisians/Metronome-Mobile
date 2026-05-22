@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paricheh.metronome.data.MetronomeSettings
 import com.paricheh.metronome.sound.MetronomeSoundPlayer
+import com.paricheh.metronome.utils.TimeSignatureType
 import com.paricheh.metronome.utils.getTempoMarkingByBpm
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,52 +92,86 @@ class MetronomeViewModel(
         viewModelScope.launch {
             isMetronomeStarted.collectLatest { isStarted ->
                 if (!isStarted) return@collectLatest
+
                 val selectedTimeSignature = metronomePreferences.value
                     ?.selectedTimeSignature
 
                 val actualBarStructure = selectedTimeSignature
                     ?.defaultBarsStructure
-                    .orEmpty()
 
                 val convertedBarStructure = metronomePreferences.value
                     ?.selectedBarStructure
-                    .orEmpty()
 
-                val isConvertedBar =
-                    convertedBarStructure.size != actualBarStructure.size
+                when {
+                    // Normal Playing
+                    selectedTimeSignature == null -> {
+                        while (true) {
+                            delay(durationInMillisecond.value.toLong())
+                            soundPlayer.playTick()
+                        }
+                    }
 
-                // compound mode
-                // actual.size = 3 _ _ _
-                // converted.size = 6 '' '' ''
+                    // only timeSignature was selected and not converted
+                    convertedBarStructure == null -> {
+                        while (true) {
+                            var i = 0
 
-                // 2 times more than actual for each beat
-                val convertedDivision =
-                    convertedBarStructure.size / actualBarStructure.size
+                            do {
+                                delay(durationInMillisecond.value.toLong())
 
-                val durationForConverted =
-                    durationInMillisecond.value / convertedDivision
+                                if (selectedTimeSignature.defaultBarsStructure[i++].isAccent) {
+                                    soundPlayer.playAccent()
+                                } else {
+                                    soundPlayer.playTick()
+                                }
+                            } while (i <= selectedTimeSignature.defaultBarsStructure.size - 1)
+                        }
+                    }
 
+                    selectedTimeSignature.type == TimeSignatureType.Irregular -> {
+                        val convertedDivision =
+                            convertedBarStructure.size / actualBarStructure!!.size
 
-                while (true) {
-                    var i = 0
-                    do {
-                        repeat(convertedDivision - 1) {
+                        val durationForConverted =
+                            durationInMillisecond.value / convertedDivision
+
+                        while (true) {
                             delay(durationForConverted.toLong())
                             soundPlayer.playSubBeat()
                         }
+                    }
 
-                        val isAccent = actualBarStructure
-                            .getOrNull(i++)
-                            ?.isAccent
-                            ?: false
+                    else -> {
+                        val convertedDivision =
+                            convertedBarStructure.size / actualBarStructure!!.size
 
-                        if (isAccent) {
-                            soundPlayer.playAccent()
-                        } else {
-                            soundPlayer.playTick()
+                        val durationForConverted =
+                            durationInMillisecond.value / convertedDivision
+
+                        while (true) {
+                            var i = 0
+                            do {
+                                repeat(convertedDivision - 1) {
+                                    delay(durationForConverted.toLong())
+                                    soundPlayer.playSubBeat()
+                                }
+
+                                delay(durationForConverted.toLong())
+
+                                val isAccent = actualBarStructure
+                                    .getOrNull(i++)
+                                    ?.isAccent
+                                    ?: false
+
+                                if (isAccent) {
+                                    soundPlayer.playAccent()
+                                } else {
+                                    soundPlayer.playTick()
+                                }
+
+                            } while (i <= actualBarStructure.lastIndex)
                         }
-
-                    } while (i <= actualBarStructure.lastIndex)
+                    }
                 }
             }
         }

@@ -55,12 +55,15 @@ class TimeSignature(
                 List(numerator) {
                     Note(denominator)
                 }.chunked(2)
-                    .map {
-                        if (it.size == 1) {
+                    .mapIndexed { index, notes ->
+                        if (notes.size == 1) {
                             numberOfDotedNote++
                         }
 
-                        Note(denominator / 2)
+                        Note(
+                            weight = denominator / 2,
+                            isAccent = index == 0
+                        )
                     }
                     .toMutableList()
                     .apply {

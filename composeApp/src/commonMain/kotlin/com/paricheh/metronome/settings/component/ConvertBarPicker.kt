@@ -94,7 +94,7 @@ fun ConvertBarPicker(
                         modifier = Modifier.fillMaxWidth(),
                         label = { it.getUnitCharByUnit() },
                         dividersColor = Color.Transparent,
-                        textStyle = NonCommonTypography.musicFontLarge,
+                        textStyle = NonCommonTypography.PersianSonatiNumber,
                     )
 
                     Spacer(Modifier.height(24.dp))

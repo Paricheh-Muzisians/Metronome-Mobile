@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -325,6 +326,7 @@ private fun TempoSection(
         ) {
             OutlinedButton(
                 modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
                 onClick = { if (tempo > 20) onTempoChange(tempo - 1) },
                 enabled = tempo > 20,
             ) {
@@ -340,6 +342,7 @@ private fun TempoSection(
 
             OutlinedButton(
                 modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.small,
                 onClick = { if (tempo < 240) onTempoChange(tempo + 1) },
                 enabled = tempo < 240
             ) {
@@ -357,6 +360,8 @@ private fun TempoSection(
         Spacer(modifier = Modifier.height(4.dp))
 
         HorizontalDivider()
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = stringResource(Res.string.detect_tempo),
@@ -552,6 +557,7 @@ private fun TimeSignatureSection(
                         MaterialTheme.shapes.medium
                     )
                     .fillMaxWidth(),
+                contentPadding = PaddingValues(bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 reverseLayout = true
@@ -606,27 +612,20 @@ private fun TimeSignatureSection(
             Column {
                 Spacer(Modifier.height(16.dp))
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable {
-                            onOpenConvertBarStructurePicker()
-                        }
-                        .border(
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            width = 1.dp,
-                            shape = MaterialTheme.shapes.medium,
-                        )
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.small,
+                    onClick = {
+                        onOpenConvertBarStructurePicker()
+                    }
                 ) {
                     Text(
                         text = stringResource(Res.string.choose_unit_note),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+
+                    Spacer(modifier = Modifier.weight(1f))
 
                     Text(
                         text = barStructureNoteUnit,
@@ -691,6 +690,8 @@ private fun SwitchSetting(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        Spacer(Modifier.width(16.dp))
 
         Switch(
             checked = checked,

@@ -31,6 +31,12 @@ import com.composables.core.Sheet
 import com.paricheh.metronome.theme.NonCommonTypography
 import com.paricheh.metronome.utils.Note
 import com.paricheh.metronome.utils.TimeSignature
+import metronome.composeapp.generated.resources.Res
+import metronome.composeapp.generated.resources.confirm
+import metronome.composeapp.generated.resources.custom_time_signature
+import metronome.composeapp.generated.resources.denominator
+import metronome.composeapp.generated.resources.numerator
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CustomTimeSignaturePicker(
@@ -60,7 +66,7 @@ fun CustomTimeSignaturePicker(
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        text = "کسر میزان سفارشی",
+                        text = stringResource(Res.string.custom_time_signature),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -69,7 +75,7 @@ fun CustomTimeSignaturePicker(
 
                     Text(
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        text = "صورت (تعداد ضرب)",
+                        text = stringResource(Res.string.numerator),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -94,7 +100,7 @@ fun CustomTimeSignaturePicker(
 
                     Text(
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        text = "مخرج (واحد)",
+                        text = stringResource(Res.string.denominator),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -136,7 +142,7 @@ fun CustomTimeSignaturePicker(
                                 )
                             },
                         ) {
-                            Text("تایید")
+                            Text(stringResource(Res.string.confirm))
                         }
 
                         OutlinedButton(
@@ -144,7 +150,7 @@ fun CustomTimeSignaturePicker(
                                 .weight(1f),
                             onClick = onDismiss
                         ) {
-                            Text("انصراف")
+                            Text(stringResource(Res.string.confirm))
                         }
                     }
                 }

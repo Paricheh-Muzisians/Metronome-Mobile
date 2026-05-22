@@ -2,8 +2,11 @@ package com.paricheh.metronome.settings
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -80,16 +83,20 @@ import metronome.composeapp.generated.resources.Res
 import metronome.composeapp.generated.resources.bpm_format
 import metronome.composeapp.generated.resources.cd_back
 import metronome.composeapp.generated.resources.cd_decrease_tempo
-import metronome.composeapp.generated.resources.compund_time_signature
+import metronome.composeapp.generated.resources.choose_unit_note
+import metronome.composeapp.generated.resources.compound_time_signature
+import metronome.composeapp.generated.resources.convert_bar
+import metronome.composeapp.generated.resources.convert_bar_message
 import metronome.composeapp.generated.resources.custom
 import metronome.composeapp.generated.resources.decrement
 import metronome.composeapp.generated.resources.detect_tempo
 import metronome.composeapp.generated.resources.detect_tempo_message
 import metronome.composeapp.generated.resources.increment
 import metronome.composeapp.generated.resources.irregular_time_signature
+import metronome.composeapp.generated.resources.message_compound_time_signature_warning
 import metronome.composeapp.generated.resources.message_irregular_time_signature_warning
 import metronome.composeapp.generated.resources.settings_title
-import metronome.composeapp.generated.resources.tab_here
+import metronome.composeapp.generated.resources.tap_here
 import metronome.composeapp.generated.resources.tempo
 import metronome.composeapp.generated.resources.tempo_max
 import metronome.composeapp.generated.resources.tempo_min
@@ -250,7 +257,6 @@ private fun ScreenContent(
                 checked = preferences.vibrationEnabled,
                 onCheckedChange = onUpdateVibrationEnabled
             )
-
         }
     }
 }
@@ -378,7 +384,7 @@ private fun TempoSection(
             Box(modifier = Modifier.fillMaxSize()) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = stringResource(Res.string.tab_here),
+                    text = stringResource(Res.string.tap_here),
                     style = MaterialTheme.typography.titleSmall
                 )
             }
@@ -510,7 +516,7 @@ private fun TimeSignatureSection(
                 ) {
                     append(
                         text = if (selectedTimeSignature?.type == TimeSignatureType.Compound) {
-                            stringResource(Res.string.compund_time_signature)
+                            stringResource(Res.string.compound_time_signature)
                         } else {
                             stringResource(Res.string.irregular_time_signature)
                         },
@@ -519,7 +525,11 @@ private fun TimeSignatureSection(
                 appendLine()
                 appendLine()
                 append(
-                    stringResource(Res.string.message_irregular_time_signature_warning)
+                    text = if (selectedTimeSignature?.type == TimeSignatureType.Compound) {
+                        stringResource(Res.string.message_compound_time_signature_warning)
+                    } else {
+                        stringResource(Res.string.message_irregular_time_signature_warning)
+                    },
                 )
             }
 
@@ -569,8 +579,8 @@ private fun TimeSignatureSection(
         }
 
         SwitchSetting(
-            title = "تبدیل میزان",
-            description = "با قابلیت تبدیل میزان می توانید ساختار میزان را تبدیل کرده و نت های کوچک تر را به صورت Sub Beat پخش کنید.",
+            title = stringResource(Res.string.convert_bar),
+            description = stringResource(Res.string.convert_bar_message),
             checked = shouldShowConvertTimeSignature,
             onCheckedChange = {
                 if (!it) {
@@ -613,7 +623,7 @@ private fun TimeSignatureSection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "انتخاب نوت پایه",
+                        text = stringResource(Res.string.choose_unit_note),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

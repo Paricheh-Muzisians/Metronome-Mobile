@@ -30,6 +30,10 @@ import com.composables.core.Scrim
 import com.composables.core.Sheet
 import com.paricheh.metronome.theme.NonCommonTypography
 import com.paricheh.metronome.utils.Note
+import metronome.composeapp.generated.resources.Res
+import metronome.composeapp.generated.resources.choose_note
+import metronome.composeapp.generated.resources.convert_time_signature_message
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ConvertBarPicker(
@@ -64,7 +68,7 @@ fun ConvertBarPicker(
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 20.dp),
-                        text = "انتخاب نت",
+                        text = stringResource(Res.string.choose_note),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -72,7 +76,7 @@ fun ConvertBarPicker(
                     Spacer(Modifier.height(8.dp))
 
                     Text(
-                        text = "انتخاب کنید کسر میزان به پایه چه نتی میخواهد تبدیل شود.",
+                        text = stringResource(Res.string.convert_time_signature_message),
                         modifier = Modifier.padding(horizontal = 20.dp),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant

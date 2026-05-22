@@ -1,16 +1,20 @@
 <resources>
-    <string name="persian_tempo_prestissimo">بسیار بسیار تند</string>
-    <string name="persian_tempo_presto">بسیار تند</string>
-    <string name="persian_tempo_vivace">سرزنده و تند</string>
-    <string name="persian_tempo_allegro">شاد و تند</string>
-    <string name="persian_tempo_moderato">متوسط</string>
-    <string name="persian_tempo_andante">آهسته در حد گام‌رو</string>
-    <string name="persian_tempo_adagio">آهسته و آرام</string>
-    <string name="persian_tempo_larghetto">نسبتاً آهسته</string>
-    <string name="persian_tempo_lento">کند</string>
-    <string name="persian_tempo_largo">بسیار آهسته</string>
-    <string name="persian_tempo_grave">سنگین و بسیار آهسته</string>
-    <string name="persian_tempo_larghissimo">فوق‌العاده آهسته</string>
+
+    <!-- Tempo Markings (Persian Explanations) -->
+    <string name="persian_tempo_prestissimo">بسیار تند و پرشتاب</string>
+    <string name="persian_tempo_presto">خیلی تند</string>
+    <string name="persian_tempo_vivace">سرزنده و پرانرژی</string>
+    <string name="persian_tempo_allegro">شاد، روان و تند</string>
+    <string name="persian_tempo_moderato">با سرعت متوسط</string>
+    <string name="persian_tempo_andante">آرام، در حال قدم‌زدن</string>
+    <string name="persian_tempo_adagio">آرام و با احساس</string>
+    <string name="persian_tempo_larghetto">نسبتاً آرام</string>
+    <string name="persian_tempo_lento">کند و کشیده</string>
+    <string name="persian_tempo_largo">بسیار آرام و گسترده</string>
+    <string name="persian_tempo_grave">سنگین، جدی و بسیار آرام</string>
+    <string name="persian_tempo_larghissimo">فوق‌العاده آرام</string>
+
+    <!-- Tempo Markings (Italian Terms) -->
     <string name="english_tempo_prestissimo">Prestissimo</string>
     <string name="english_tempo_presto">Presto</string>
     <string name="english_tempo_vivace">Vivace</string>
@@ -23,33 +27,77 @@
     <string name="english_tempo_largo">Largo</string>
     <string name="english_tempo_grave">Grave</string>
     <string name="english_tempo_larghissimo">Larghissimo</string>
+
+    <!-- General -->
     <string name="settings_title">تنظیمات</string>
     <string name="cd_back">بازگشت</string>
+
+    <!-- Tempo -->
     <string name="tempo">تمپو</string>
     <string name="bpm_format">%1$d BPM</string>
     <string name="tempo_min">20</string>
     <string name="tempo_max">240</string>
     <string name="cd_increase_tempo">افزایش تمپو</string>
     <string name="cd_decrease_tempo">کاهش تمپو</string>
+
+    <!-- Time Signature -->
     <string name="time_signature">کسر میزان</string>
     <string name="custom">سفارشی</string>
     <string name="custom_time_signature">کسر میزان سفارشی</string>
-    <string name="beats">ضرب‌ها</string>
-    <string name="unit">واحد</string>
-    <string name="accent_first_beat">تأکید روی ضرب اول</string>
-    <string name="accent_first_beat_desc">پخش صدای متفاوت برای ضرب اول</string>
+
+    <string name="beats">تعداد ضرب‌ها</string>
+    <string name="unit">واحد ضرب</string>
+
+    <string name="compound_time_signature">کسر میزان ترکیبی</string>
+    <string name="irregular_time_signature">کسر میزان لَنگ</string>
+
+    <string name="message_compound_time_signature_warning">لطفاً توجه داشته باشید که این کسر میزان به‌صورت ترکیبی گروه‌بندی و پخش می‌شود.\nدر صورت نیاز می‌توانید از قابلیت تبدیل میزان استفاده کنید.</string>
+
+    <string name="message_irregular_time_signature_warning">لطفاً توجه داشته باشید که در کسر میزان‌های لَنگ، ضرب‌ها بر اساس گروه‌بندی داخلی میزان پخش می‌شوند.\nهمچنین در حالت تبدیل میزان، فقط Subdivisionها پخش شده و آکسان‌های اصلی اجرا نمی‌شوند.
+</string>
+    <string name="time_signature_hint">با انتخاب کسر میزان، ضرب اول هر میزان به‌صورت آکسان (Accent) پخش می‌شود.</string>
+
+    <!-- Accent -->
+    <string name="accent_first_beat">آکسان ضرب اول</string>
+    <string name="accent_first_beat_desc">پخش صدای متفاوت برای ضرب اول هر میزان</string>
+
+    <!-- Sound -->
     <string name="sound">صدا</string>
     <string name="sound_desc">فعال‌سازی صدای مترونوم</string>
+
+    <!-- Vibration -->
     <string name="vibration">لرزش</string>
-    <string name="vibration_desc">بازخورد لرزشی در هر ضرب</string>
-    <string name="compund_time_signature">کسر میزان ترکیبی</string>
-    <string name="irregular_time_signature">کسر میزان مختلط</string>
-    <string name="message_irregular_time_signature_warning">لطفا توجه کنید برای کسر میزان انتخاب شده هر میزان به شکل زیر در نظر گرفته شده، در صورت نیاز به از قابلیت تبدیل کسر میزان استفاده کنید.</string>
+    <string name="vibration_desc">بازخورد لرزشی هنگام پخش ضرب‌ها</string>
+
+    <!-- Increment / Decrement -->
     <string name="increment">افزایش</string>
     <string name="decrement">کاهش</string>
+
+    <!-- Tap Tempo -->
     <string name="detect_tempo">تشخیص تمپو</string>
-    <string name="detect_tempo_message">با ضربه زدن روی صفحع پایین تمپوی خود را پیدا کنین.</string>
-    <string name="tab_here">اینجا ضربه بزنید</string>
-    <string name="time_signature_hint">با انتخاب یک کسر میزان ضرب اول هر میزان به صورت آکسانت (Accent) پخش خواهد شد.</string>
+    <string name="detect_tempo_message">با ضربه زدن روی ناحیه پایین صفحه، تمپوی موردنظر خود را پیدا کنید.</string>
+
+    <string name="tap_here">برای ضرب گرفتن اینجا لمس کنید</string>
+
+    <!-- Selection -->
     <string name="unselected">بدون انتخاب</string>
+
+    <!-- Notes -->
+    <string name="choose_note">انتخاب نت</string>
+    <string name="choose_unit_note">انتخاب نت پایه</string>
+
+    <!-- Time Signature Conversion -->
+    <string name="convert_time_signature_message">انتخاب کنید کسر میزان بر اساس چه نت پایه‌ای تبدیل شود.</string>
+
+    <string name="numerator">صورت (تعداد ضرب‌ها)</string>
+    <string name="denominator">مخرج (واحد ضرب)</string>
+
+    <string name="confirm">تأیید</string>
+    <string name="cancel">انصراف</string>
+
+    <!-- Measure Conversion -->
+    <string name="convert_bar">تبدیل میزان (Subdivision)</string>
+
+    <string name="convert_bar_message">با استفاده از قابلیت تبدیل میزان می‌توانید ساختار ریتم را تغییر داده و ضرب‌های کوچک‌تر را به‌صورت Subdivision پخش کنید.</string>
+
 </resources>

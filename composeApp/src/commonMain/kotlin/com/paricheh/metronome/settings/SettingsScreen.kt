@@ -2,15 +2,15 @@ package com.paricheh.metronome.settings
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,15 +49,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -79,6 +80,7 @@ import com.paricheh.metronome.utils.MusicSymbols
 import com.paricheh.metronome.utils.Note
 import com.paricheh.metronome.utils.TimeSignature
 import com.paricheh.metronome.utils.TimeSignatureType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import metronome.composeapp.generated.resources.Res
 import metronome.composeapp.generated.resources.bpm_format
@@ -108,6 +110,7 @@ import metronome.composeapp.generated.resources.vibration
 import metronome.composeapp.generated.resources.vibration_desc
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -267,6 +270,8 @@ private fun TempoSection(
     tempo: Int,
     onTempoChange: (Int) -> Unit,
 ) {
+    val animatedTempo by animateFloatAsState(tempo.toFloat())
+
     Column(
         modifier = Modifier
             .background(
@@ -288,14 +293,14 @@ private fun TempoSection(
             )
 
             Text(
-                text = stringResource(Res.string.bpm_format, tempo),
+                text = stringResource(Res.string.bpm_format, animatedTempo.toInt()),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
         Slider(
-            value = tempo.toFloat(),
+            value = animatedTempo,
             onValueChange = { onTempoChange(it.toInt()) },
             valueRange = 20f..240f,
             steps = 219,
@@ -375,23 +380,65 @@ private fun TempoSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
+        var tapTimeMillis: Long? by rememberSaveable {
+            mutableStateOf(null)
+        }
+
+        LaunchedEffect(tapTimeMillis) {
+            if (tapTimeMillis == null) {
+                return@LaunchedEffect
+            }
+
+            val previousTime = tapTimeMillis
+
+            launch {
+                delay(60000 / 20)
+                tapTimeMillis = null
+            }.invokeOnCompletion {
+                if (it != null && previousTime != null) {
+                    val tapDuration =
+                        Clock.System.now().toEpochMilliseconds() - previousTime
+
+                    val newTempo = 60000 / (tapDuration.toInt()
+                        .coerceIn(60000 / 240, 60000 / 20))
+
+                    onTempoChange(newTempo)
+                }
+            }
+        }
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(4f),
             onClick = {
-
+                tapTimeMillis = Clock.System.now().toEpochMilliseconds()
             },
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
             ),
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = stringResource(Res.string.tap_here),
-                    style = MaterialTheme.typography.titleSmall
-                )
+            AnimatedContent(
+                targetState = tapTimeMillis,
+                transitionSpec = {
+                    scaleIn(
+                        spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy
+                        )
+                    ) + fadeIn() togetherWith scaleOut(
+                        spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy
+                        )
+                    ) + fadeOut()
+                }
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = stringResource(Res.string.tap_here),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
             }
         }
     }

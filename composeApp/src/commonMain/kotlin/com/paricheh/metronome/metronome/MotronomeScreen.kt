@@ -33,6 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +49,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
@@ -73,6 +77,16 @@ fun MetronomeScreen(
     val isMetronomeStarted by viewModel.isMetronomeStarted.collectAsStateWithLifecycle()
     val currentTempoMarkings by viewModel.currentTempoMarkings.collectAsStateWithLifecycle()
     val preferences by viewModel.metronomePreferences.collectAsStateWithLifecycle()
+
+    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+        viewModel.stopMetronome()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopMetronome()
+        }
+    }
 
     var metronomeBodyHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current

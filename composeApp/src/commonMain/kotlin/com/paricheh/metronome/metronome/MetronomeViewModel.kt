@@ -6,21 +6,38 @@ import com.paricheh.metronome.data.MetronomeSettings
 import com.paricheh.metronome.sound.MetronomeSoundPlayer
 import com.paricheh.metronome.utils.TimeSignatureType
 import com.paricheh.metronome.utils.getTempoMarkingByBpm
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MetronomeViewModel(
-    settings: MetronomeSettings,
+    private val settings: MetronomeSettings,
     private val soundPlayer: MetronomeSoundPlayer,
 ) : ViewModel() {
-    private val _currentTempoBpm = MutableStateFlow(100f)
+    var setTempoJob: Job? = null
+    val metronomePreferences = settings.preferences
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null
+        )
+
+    private val _currentTempoBpm = MutableStateFlow(
+        metronomePreferences.value
+            ?.tempo
+            ?.toFloat()
+            ?: 100f
+    )
     val currentTempoBpm = _currentTempoBpm.asStateFlow()
 
     private val _currentTempoMarking = MutableStateFlow(
@@ -39,22 +56,33 @@ class MetronomeViewModel(
     private val _pendulumAngle = MutableStateFlow(0f)
     val pendulumAngle = _pendulumAngle.asStateFlow()
 
-    val metronomePreferences = settings.preferences
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
-
     init {
+        observeSettingTempo()
         observeTempoMarking()
         observeDurationChanges()
         observeStartingMetronome()
         observeSoundPlaying()
     }
 
+    private fun observeSettingTempo() {
+        metronomePreferences
+            .map { it?.tempo }
+            .distinctUntilChanged()
+            .onEach {
+                if (it != null) {
+                    setTempo(it.toFloat())
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun setTempo(bpm: Float) {
         _currentTempoBpm.value = bpm
+
+        setTempoJob?.cancel()
+        setTempoJob = viewModelScope.launch {
+            settings.updateTempo(bpm.toInt())
+        }
     }
 
     fun startMetronome(pendulumAngle: Float) {

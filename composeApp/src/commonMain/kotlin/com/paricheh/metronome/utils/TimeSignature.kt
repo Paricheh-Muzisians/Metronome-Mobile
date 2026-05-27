@@ -105,10 +105,10 @@ class TimeSignature(
             2 to 4,
             3 to 4,
             4 to 4,
-            5 to 4,
             6 to 8,
-            7 to 8,
             9 to 8,
+            2 to 2,
+            3 to 8,
             12 to 8
         )
     }

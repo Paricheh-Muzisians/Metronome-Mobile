@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 class MetronomeViewModel(
     private val settings: MetronomeSettings,
@@ -81,7 +82,7 @@ class MetronomeViewModel(
 
         setTempoJob?.cancel()
         setTempoJob = viewModelScope.launch {
-            settings.updateTempo(bpm.toInt())
+            settings.updateTempo(bpm.roundToInt())
         }
     }
 

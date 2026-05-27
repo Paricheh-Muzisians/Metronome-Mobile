@@ -64,6 +64,7 @@ import metronome.composeapp.generated.resources.metronome_sliding_weight
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -202,7 +203,7 @@ fun MetronomeScreen(
 
 
             val tempoText = buildAnnotatedString {
-                val currentTempoNumber = currentBpm.toInt()
+                val currentTempoNumber = currentBpm.roundToInt()
                     .toString()
 
                 preferences?.selectedTimeSignature?.let {

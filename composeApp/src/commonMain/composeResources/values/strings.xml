@@ -4,14 +4,14 @@
     <string name="persian_tempo_prestissimo">بسیار تند و پرشتاب</string>
     <string name="persian_tempo_presto">خیلی تند</string>
     <string name="persian_tempo_vivace">سرزنده و پرانرژی</string>
-    <string name="persian_tempo_allegro">شاد، روان و تند</string>
-    <string name="persian_tempo_moderato">با سرعت متوسط</string>
+    <string name="persian_tempo_allegro">سریع و روان</string>
+    <string name="persian_tempo_moderato">متوسط</string>
     <string name="persian_tempo_andante">آرام، در حال قدم‌زدن</string>
     <string name="persian_tempo_adagio">آرام و با احساس</string>
     <string name="persian_tempo_larghetto">نسبتاً آرام</string>
-    <string name="persian_tempo_lento">کند و کشیده</string>
-    <string name="persian_tempo_largo">بسیار آرام و گسترده</string>
-    <string name="persian_tempo_grave">سنگین، جدی و بسیار آرام</string>
+    <string name="persian_tempo_lento">سنگین</string>
+    <string name="persian_tempo_largo">آرام</string>
+    <string name="persian_tempo_grave">بسیار آرام</string>
     <string name="persian_tempo_larghissimo">فوق‌العاده آرام</string>
 
     <!-- Tempo Markings (Italian Terms) -->

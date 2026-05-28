@@ -247,21 +247,22 @@ private fun ScreenContent(
             onSetConvertBarStructureReset = onSetConvertBarStructureReset
         )
 
-        Column(
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    shape = MaterialTheme.shapes.large
-                )
-                .padding(16.dp)
-        ) {
-            SwitchSetting(
-                title = stringResource(Res.string.vibration),
-                description = stringResource(Res.string.vibration_desc),
-                checked = preferences.vibrationEnabled,
-                onCheckedChange = onUpdateVibrationEnabled
-            )
-        }
+        //TODO ADD this when vibration feature implemented
+//        Column(
+//            modifier = Modifier
+//                .background(
+//                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
+//                    shape = MaterialTheme.shapes.large
+//                )
+//                .padding(16.dp)
+//        ) {
+//            SwitchSetting(
+//                title = stringResource(Res.string.vibration),
+//                description = stringResource(Res.string.vibration_desc),
+//                checked = preferences.vibrationEnabled,
+//                onCheckedChange = onUpdateVibrationEnabled
+//            )
+//        }
     }
 }
 

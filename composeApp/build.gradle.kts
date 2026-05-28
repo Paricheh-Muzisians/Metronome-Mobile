@@ -70,8 +70,8 @@ android {
         applicationId = "com.paricheh.metronome"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 10100000
+        versionName = "1.0.0"
     }
     packaging {
         resources {

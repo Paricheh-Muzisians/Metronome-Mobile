@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -66,23 +67,44 @@ android {
     namespace = "com.paricheh.metronome"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    signingConfigs {
+        create("release") {
+            enableV3Signing = true
+            storeFile = rootProject.file("release/paricheh-metronome.jks")
+            keyAlias = loadValueFromProperties("KEY_ALIAS")
+            storePassword = loadValueFromProperties("STORE_PASSWORD")
+            keyPassword = loadValueFromProperties("KEY_PASSWORD")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.paricheh.metronome"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 10100000
-        versionName = "1.0.0"
+        versionCode = 10100010
+        versionName = "1.0.1"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
     buildTypes {
-        getByName("release") {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("release")
+        }
+
+        debug {
+            isDebuggable = true
             isMinifyEnabled = false
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -93,3 +115,13 @@ dependencies {
     debugImplementation(libs.compose.uiTooling)
 }
 
+fun loadValueFromProperties(key: String, propName: String = "local.properties"): String? {
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file(propName)
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use {
+            properties.load(it)
+        }
+    }
+    return properties.getProperty(key)
+}

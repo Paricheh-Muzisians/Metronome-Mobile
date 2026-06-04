@@ -1,4 +1,6 @@
+import com.android.build.api.dsl.ApplicationDefaultConfig
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.text.DecimalFormat
 import java.util.Properties
 
 plugins {
@@ -81,8 +83,14 @@ android {
         applicationId = "com.paricheh.metronome"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 10100010
-        versionName = "1.0.1"
+
+        setVersion(
+            epoch = 1,
+            major = 1,
+            minor = 0,
+            patch = 1,
+            offset = 0
+        )
     }
 
     packaging {
@@ -124,4 +132,21 @@ fun loadValueFromProperties(key: String, propName: String = "local.properties"):
         }
     }
     return properties.getProperty(key)
+}
+
+fun ApplicationDefaultConfig.setVersion(
+    epoch: Int,
+    major: Int,
+    minor: Int,
+    patch: Int,
+    offset: Int,
+) {
+    val versionFormat = DecimalFormat("00")
+
+    val majorFormated = versionFormat.format(major)
+    val minorFormated = versionFormat.format(minor)
+    val patchFormated = versionFormat.format(patch)
+
+    versionName = "$major.$minor.$patch"
+    versionCode = ("$epoch$majorFormated$minorFormated$patchFormated$offset").toInt()
 }

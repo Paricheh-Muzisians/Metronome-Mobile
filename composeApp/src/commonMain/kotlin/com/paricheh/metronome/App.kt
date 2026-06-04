@@ -23,7 +23,6 @@ import com.paricheh.metronome.theme.MetronomeTheme
 @Composable
 @Preview
 fun App() {
-
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         MetronomeTheme {
             val navController = rememberNavController()

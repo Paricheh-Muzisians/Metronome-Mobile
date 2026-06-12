@@ -2,6 +2,7 @@ package com.paricheh.metronome.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paricheh.metronome.core.vibrator.MetronomeVibrator
 import com.paricheh.metronome.data.MetronomePreferences
 import com.paricheh.metronome.data.MetronomeSettings
 import com.paricheh.metronome.utils.Note
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
+    val vibrator: MetronomeVibrator,
     private val settings: MetronomeSettings,
 ) : ViewModel() {
     val preferences: StateFlow<MetronomePreferences?> = settings.preferences

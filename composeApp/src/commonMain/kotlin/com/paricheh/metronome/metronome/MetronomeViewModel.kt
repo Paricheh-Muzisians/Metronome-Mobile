@@ -3,11 +3,11 @@ package com.paricheh.metronome.metronome
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paricheh.metronome.data.MetronomeSettings
-import com.paricheh.metronome.sound.MetronomeSoundPlayer
+import com.paricheh.metronome.core.soundplayer.MetronomeSoundPlayer
+import com.paricheh.metronome.core.vibrator.MetronomeVibrator
 import com.paricheh.metronome.utils.TimeSignatureType
 import com.paricheh.metronome.utils.getTempoMarkingByBpm
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,6 +24,7 @@ import kotlin.math.roundToInt
 class MetronomeViewModel(
     private val settings: MetronomeSettings,
     private val soundPlayer: MetronomeSoundPlayer,
+    private val vibrator: MetronomeVibrator,
 ) : ViewModel() {
     var setTempoJob: Job? = null
     val metronomePreferences = settings.preferences
@@ -78,6 +79,11 @@ class MetronomeViewModel(
     }
 
     fun setTempo(bpm: Float) {
+
+        if (bpm.roundToInt() % 5 == 0 && _currentTempoBpm.value.roundToInt() != bpm.roundToInt()) {
+            vibrator.vibrateOnScroll()
+        }
+
         _currentTempoBpm.value = bpm
 
         setTempoJob?.cancel()
@@ -137,6 +143,9 @@ class MetronomeViewModel(
                         while (true) {
                             delay(durationInMillisecond.value.toLong())
                             soundPlayer.playTick()
+                            if (metronomePreferences.value?.vibrationEnabled == true) {
+                                vibrator.vibrateOnTick()
+                            }
                         }
                     }
 
@@ -148,10 +157,15 @@ class MetronomeViewModel(
                             do {
                                 delay(durationInMillisecond.value.toLong())
 
+                                if (metronomePreferences.value?.vibrationEnabled == true) {
+                                    vibrator.vibrateOnTick()
+                                }
+
                                 if (selectedTimeSignature.defaultBarsStructure[i++].isAccent) {
                                     soundPlayer.playAccent()
                                 } else {
                                     soundPlayer.playTick()
+
                                 }
                             } while (i <= selectedTimeSignature.defaultBarsStructure.size - 1)
                         }
@@ -191,6 +205,10 @@ class MetronomeViewModel(
                                     .getOrNull(i++)
                                     ?.isAccent
                                     ?: false
+
+                                if (metronomePreferences.value?.vibrationEnabled == true) {
+                                    vibrator.vibrateOnTick()
+                                }
 
                                 if (isAccent) {
                                     soundPlayer.playAccent()

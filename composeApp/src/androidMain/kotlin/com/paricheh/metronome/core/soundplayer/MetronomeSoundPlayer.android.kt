@@ -1,4 +1,4 @@
-package com.paricheh.metronome.sound
+package com.paricheh.metronome.core.soundplayer
 
 import android.media.AudioAttributes
 import android.media.SoundPool

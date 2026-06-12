@@ -1,4 +1,4 @@
-package com.paricheh.metronome.sound
+package com.paricheh.metronome.core.soundplayer
 
 /**
  * Platform-specific sound player for metronome ticks.

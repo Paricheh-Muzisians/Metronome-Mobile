@@ -209,6 +209,12 @@ fun SettingsScreen(
                     },
                     onSetConvertBarStructureReset = {
                         viewModel.convertBarStructure(null)
+                    },
+                    onTempoVibration = {
+                        viewModel.vibrator.vibrateOnButtonClick()
+                    },
+                    onRadioButtonVibrate = {
+                        viewModel.vibrator.vibrateOnRadioButtonChange()
                     }
                 )
             }
@@ -220,11 +226,13 @@ fun SettingsScreen(
 private fun ScreenContent(
     preferences: MetronomePreferences,
     onUpdateTempo: (Int) -> Unit,
+    onTempoVibration: () -> Unit,
     onUpdateTimeSignature: (TimeSignature?) -> Unit,
     onUpdateVibrationEnabled: (Boolean) -> Unit,
     onOpenConvertBarStructurePicker: () -> Unit,
     onOpenCustomTimeSignaturePicker: () -> Unit,
     onSetConvertBarStructureReset: () -> Unit,
+    onRadioButtonVibrate: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -235,7 +243,8 @@ private fun ScreenContent(
     ) {
         TempoSection(
             tempo = preferences.tempo,
-            onTempoChange = onUpdateTempo
+            onTempoChange = onUpdateTempo,
+            onVibrate = onTempoVibration
         )
 
         TimeSignatureSection(
@@ -244,25 +253,28 @@ private fun ScreenContent(
             convertedBarStructure = preferences.selectedBarStructure,
             onOpenConvertBarStructurePicker = onOpenConvertBarStructurePicker,
             onOpenCustomTimeSignaturePicker = onOpenCustomTimeSignaturePicker,
-            onSetConvertBarStructureReset = onSetConvertBarStructureReset
+            onSetConvertBarStructureReset = onSetConvertBarStructureReset,
+            onRadioButtonVibrate = onRadioButtonVibrate
         )
 
-        //TODO ADD this when vibration feature implemented
-//        Column(
-//            modifier = Modifier
-//                .background(
-//                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
-//                    shape = MaterialTheme.shapes.large
-//                )
-//                .padding(16.dp)
-//        ) {
-//            SwitchSetting(
-//                title = stringResource(Res.string.vibration),
-//                description = stringResource(Res.string.vibration_desc),
-//                checked = preferences.vibrationEnabled,
-//                onCheckedChange = onUpdateVibrationEnabled
-//            )
-//        }
+        Column(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    shape = MaterialTheme.shapes.large
+                )
+                .padding(16.dp)
+        ) {
+            SwitchSetting(
+                title = stringResource(Res.string.vibration),
+                description = stringResource(Res.string.vibration_desc),
+                checked = preferences.vibrationEnabled,
+                onCheckedChange = {
+                    onRadioButtonVibrate()
+                    onUpdateVibrationEnabled(it)
+                }
+            )
+        }
     }
 }
 
@@ -270,6 +282,7 @@ private fun ScreenContent(
 private fun TempoSection(
     tempo: Int,
     onTempoChange: (Int) -> Unit,
+    onVibrate: () -> Unit,
 ) {
     val animatedTempo by animateFloatAsState(tempo.toFloat())
 
@@ -414,6 +427,7 @@ private fun TempoSection(
                 .aspectRatio(4f),
             onClick = {
                 tapTimeMillis = Clock.System.now().toEpochMilliseconds()
+                onVibrate()
             },
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -454,6 +468,7 @@ private fun TimeSignatureSection(
     onOpenConvertBarStructurePicker: () -> Unit,
     onOpenCustomTimeSignaturePicker: () -> Unit,
     onSetConvertBarStructureReset: () -> Unit,
+    onRadioButtonVibrate: () -> Unit,
 ) {
     val numeratorText = selectedTimeSignature?.numerator
         ?.toString()
@@ -638,6 +653,7 @@ private fun TimeSignatureSection(
             checked = shouldShowConvertTimeSignature,
             enabled = selectedTimeSignature != null,
             onCheckedChange = {
+                onRadioButtonVibrate()
                 if (!it) {
                     onSetConvertBarStructureReset()
                 }
@@ -769,7 +785,10 @@ private fun ScreenContentPreview() {
                     onUpdateTimeSignature = { },
                     onUpdateVibrationEnabled = {},
                     onOpenConvertBarStructurePicker = {},
-                    onOpenCustomTimeSignaturePicker = {}, {}
+                    onOpenCustomTimeSignaturePicker = {},
+                    onTempoVibration = {},
+                    onSetConvertBarStructureReset = { },
+                    onRadioButtonVibrate = {}
                 )
             }
         }

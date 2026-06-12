@@ -7,6 +7,7 @@ open class MetronomeScreens {
 
     @Serializable
     data object Metronome : MetronomeScreens()
+
     @Serializable
     data object Setting : MetronomeScreens()
 }

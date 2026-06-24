@@ -1,5 +1,6 @@
 package com.paricheh.metronome.metronome.ui.setting.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -20,14 +22,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.composables.core.ModalBottomSheet
-import com.composables.core.ModalBottomSheetState
-import com.composables.core.Scrim
-import com.composables.core.Sheet
+import com.composeunstyled.ModalBottomSheetState
+import com.composeunstyled.Scrim
+import com.composeunstyled.Sheet
+import com.composeunstyled.UnstyledModalBottomSheet
 import com.paricheh.metronome.designsystem.NonCommonTypography
 import com.paricheh.metronome.designsystem.HorizontalWheelPicker
 import com.paricheh.metronome.core.Note
@@ -51,19 +54,22 @@ fun ConvertBarPicker(
         )
     }
 
-    ModalBottomSheet(
+    UnstyledModalBottomSheet(
         state = state,
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        overlay = { Scrim() }
     ) {
-        Scrim()
-
-        Sheet(
-            backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
-            shape = MaterialTheme.shapes.extraLarge
-        ) {
+        Sheet {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 Column(
                     modifier = modifier
+                        .clip(
+                            MaterialTheme.shapes.extraLarge.copy(
+                                bottomEnd = CornerSize(0.dp),
+                                bottomStart = CornerSize(0.dp)
+                            )
+                        )
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
                         .navigationBarsPadding()
                         .padding(vertical = 16.dp),
                 ) {

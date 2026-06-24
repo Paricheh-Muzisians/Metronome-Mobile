@@ -55,7 +55,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlin.serialization)
             implementation(libs.setting)
-            implementation(libs.unstyled)
+            implementation(libs.unstyled.botomsheet)
         }
         androidMain.dependencies {
             implementation(libs.koin.android)

@@ -50,17 +50,11 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.composables.core.ModalBottomSheet
-import com.composables.core.ModalBottomSheetState
-import com.composables.core.Scrim
-import com.composables.core.Sheet
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt

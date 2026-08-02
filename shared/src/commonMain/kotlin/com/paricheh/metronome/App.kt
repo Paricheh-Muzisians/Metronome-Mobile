@@ -18,6 +18,8 @@ import com.paricheh.metronome.navigation.MetronomeScreens.Metronome
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
 import com.paricheh.metronome.metronome.ui.setting.SettingsScreen
 import com.paricheh.metronome.designsystem.MetronomeTheme
+import com.paricheh.metronome.navigation.TunerScreens
+import com.paricheh.metronome.tuner.ui.tuner.TunerScreen
 
 @Composable
 fun App() {
@@ -43,6 +45,13 @@ fun App() {
                     exitTransition = { fadeOut() }
                 ) {
                     SettingsScreen(navController)
+                }
+
+                composable<TunerScreens.Tuner>(
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) {
+                    TunerScreen(navController)
                 }
             }
         }

@@ -106,6 +106,12 @@ class MetronomeViewModel(
         _pendulumAngle.value = angle
     }
 
+    fun markUnboardingAsSeen() {
+        viewModelScope.launch {
+            settings.updateHasSeenUnboarding(true)
+        }
+    }
+
     private fun observeTempoMarking() {
         currentTempoBpm.onEach { newTempo ->
             _currentTempoMarking.value =

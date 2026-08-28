@@ -8,4 +8,5 @@ data class MetronomePreferences(
     val selectedTimeSignature: TimeSignature?,
     val selectedBarStructure: List<Note>?,
     val vibrationEnabled: Boolean,
+    val hasSeenUnboarding: Boolean,
 )

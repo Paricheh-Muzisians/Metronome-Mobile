@@ -101,4 +101,17 @@
     <string name="convert_bar_message">با استفاده از قابلیت تبدیل میزان می‌توانید ساختار ریتم را تغییر داده و ضرب‌های کوچک‌تر را به‌صورت Subdivision پخش کنید.</string>
 
     <string name="message_paricheh_ad">میخونم به هوای تو  پریچه \u2026</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_start_title">برای شروع</string>
+    <string name="onboarding_tempo_title">برای تنظیم تمپو</string>
+    <string name="onboarding_start_desc">برای شروع کردن مترونوم، انگشت خود را به چپ یا راست بکشید تا آونگ به حرکت در بیاد.</string>
+    <string name="onboarding_tempo_desc">برای تنظیم کردن تمپو انگشت خودتون رو به بالا یا پایین بکشید.</string>
+    <string name="continue_text">ادامه</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_settings">تنظیمات</string>
+
+    <!-- BPM -->
+    <string name="bpm">بی‌پی‌ام</string>
 </resources>

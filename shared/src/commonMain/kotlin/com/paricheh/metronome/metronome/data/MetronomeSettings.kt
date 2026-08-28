@@ -11,4 +11,5 @@ interface MetronomeSettings {
     suspend fun updateTimeSignature(timeSignature: TimeSignature?)
     suspend fun updateBarStructure(barStructure: List<Note>?)
     suspend fun updateVibrationEnabled(enabled: Boolean)
+    suspend fun updateHasSeenUnboarding(hasSeen: Boolean)
 }

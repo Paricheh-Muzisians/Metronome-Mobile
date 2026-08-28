@@ -23,6 +23,7 @@ internal class AndroidMetronomeSettings(
         val TIME_SIGNATURE = stringPreferencesKey("time_signature")
         val BAR_STRUCTURE = stringPreferencesKey("bar_structure")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
+        val HAS_SEEN_UNBOARDING = booleanPreferencesKey("has_seen_unboarding")
     }
 
     override val preferences: Flow<MetronomePreferences> = dataStore.data.map { prefs ->
@@ -34,7 +35,8 @@ internal class AndroidMetronomeSettings(
             selectedBarStructure = prefs[Keys.BAR_STRUCTURE]?.let {
                 Json.decodeFromString<List<Note>>(it)
             },
-            vibrationEnabled = prefs[Keys.VIBRATION_ENABLED] ?: false
+            vibrationEnabled = prefs[Keys.VIBRATION_ENABLED] ?: false,
+            hasSeenUnboarding = prefs[Keys.HAS_SEEN_UNBOARDING] ?: false,
         )
     }
 
@@ -64,5 +66,9 @@ internal class AndroidMetronomeSettings(
 
     override suspend fun updateVibrationEnabled(enabled: Boolean) {
         dataStore.edit { it[Keys.VIBRATION_ENABLED] = enabled }
+    }
+
+    override suspend fun updateHasSeenUnboarding(hasSeen: Boolean) {
+        dataStore.edit { it[Keys.HAS_SEEN_UNBOARDING] = hasSeen }
     }
 }

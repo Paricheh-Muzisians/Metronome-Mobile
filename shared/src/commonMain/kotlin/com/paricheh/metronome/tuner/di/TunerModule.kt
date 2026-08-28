@@ -12,6 +12,8 @@ import com.paricheh.metronome.tuner.data.theory.Piano88
 import com.paricheh.metronome.tuner.data.theory.Temperament
 import com.paricheh.metronome.tuner.data.tuner.ChromaticTuner
 import com.paricheh.metronome.tuner.data.tuner.Tuner
+import com.paricheh.metronome.tuner.ui.tuner.TunerViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val tunerModule = module {
@@ -23,4 +25,5 @@ val tunerModule = module {
     single<Tuner> { ChromaticTuner(get()) }
 
     single<TunerRepository> { TunerRepositoryImpl(get(), get(), get(), get()) }
+    viewModel<TunerViewModel> { TunerViewModel(get(),get()) }
 }

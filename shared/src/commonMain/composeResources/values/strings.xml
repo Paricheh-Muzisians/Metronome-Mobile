@@ -114,4 +114,26 @@
 
     <!-- BPM -->
     <string name="bpm">بی‌پی‌ام</string>
+    <!-- Tuner -->
+    <string name="tuner_title">کوک</string>
+    <string name="tuner_status_idle">آماده برای شروع</string>
+    <string name="tuner_status_listening">در حال شنیدن...</string>
+    <string name="tuner_status_no_signal">سیگنالی یافت نشد</string>
+    <string name="tuner_label_frequency">فرکانس</string>
+    <string name="tuner_unit_hz">هرتز</string>
+    <string name="tuner_label_cents">دقت</string>
+
+    <string name="note_do">دو</string>
+    <string name="note_do_sharp">دو دیز</string>
+    <string name="note_re">ر</string>
+    <string name="note_re_sharp">ر دیز</string>
+    <string name="note_mi">می</string>
+    <string name="note_fa">فا</string>
+    <string name="note_fa_sharp">فا دیز</string>
+    <string name="note_sol">سل</string>
+    <string name="note_sol_sharp">سل دیز</string>
+    <string name="note_la">لا</string>
+    <string name="note_la_sharp">لا دیز</string>
+    <string name="note_si">سی</string>
+
 </resources>

@@ -60,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,6 +94,7 @@ import metronome.shared.generated.resources.increment
 import metronome.shared.generated.resources.irregular_time_signature
 import metronome.shared.generated.resources.message_compound_time_signature_warning
 import metronome.shared.generated.resources.message_irregular_time_signature_warning
+import metronome.shared.generated.resources.message_paricheh_ad
 import metronome.shared.generated.resources.settings_title
 import metronome.shared.generated.resources.tap_here
 import metronome.shared.generated.resources.tempo
@@ -270,6 +272,25 @@ private fun ScreenContent(
                 }
             )
         }
+
+        val aboutText = buildAnnotatedString {
+            append(stringResource(Res.string.message_paricheh_ad))
+            addStyle(
+                style = NonCommonTypography.PersianSonatiTitleMedium
+                    .toSpanStyle()
+                    .copy(color = MaterialTheme.colorScheme.primary),
+                start = 19,
+                end = 24
+            )
+        }
+
+        Text(
+            text = aboutText,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

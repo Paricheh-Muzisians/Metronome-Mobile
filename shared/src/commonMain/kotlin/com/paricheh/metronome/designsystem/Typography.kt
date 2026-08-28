@@ -53,9 +53,15 @@ object NonCommonTypography {
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold
         )
-    val PersianSonatiLabel
+    val PersianSonatiLabelSmall
         @Composable
         get() = Typography().labelSmall.copy(
+            fontFamily = gulzarFont,
+            textAlign = TextAlign.Center,
+        )
+    val PersianSonatiTitleMedium
+        @Composable
+        get() = Typography().titleMedium.copy(
             fontFamily = gulzarFont,
             textAlign = TextAlign.Center,
         )

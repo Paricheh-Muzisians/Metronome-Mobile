@@ -234,7 +234,7 @@ fun MetronomeScreen(
                     .offset(y = -metronomeBodyHeight * 0.805f),
                 text = tempoText,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = NonCommonTypography.PersianSonatiLabel,
+                style = NonCommonTypography.PersianSonatiLabelSmall,
             )
 
             Box(

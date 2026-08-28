@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Settings
+import androidx.compose.material.icons.twotone.Tune
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -63,6 +65,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.paricheh.metronome.core.titleEnglish
 import com.paricheh.metronome.core.titlePersian
+import com.paricheh.metronome.navigation.TunerScreens
 import com.paricheh.metronome.designsystem.NonCommonTypography
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
 import metronome.shared.generated.resources.Res
@@ -243,6 +246,20 @@ fun MetronomeScreen(
                     containerColor = Color.Black
                 ),
                 title = {},
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(TunerScreens.Tuner)
+                        }
+                    ) {
+                        //TODO Chnage to tuner icon
+                        Icon(
+                            imageVector = Icons.TwoTone.Tune,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            contentDescription = "Tuner"
+                        )
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {

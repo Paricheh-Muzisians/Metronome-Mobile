@@ -1,6 +1,12 @@
 package com.paricheh.metronome.tuner.ui.tuner
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,42 +15,46 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.rounded.Sensors
+import androidx.compose.material.icons.rounded.SensorsOff
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.paricheh.metronome.tuner.data.theory.Instrument
-import com.paricheh.metronome.tuner.data.tuner.TunerResult
+import com.paricheh.metronome.tuner.data.theory.NoteInfo
 import com.paricheh.metronome.tuner.data.tuner.TunerState
-import com.paricheh.metronome.tuner.ui.tuner.component.ValueHistorySlider
-import kotlinx.coroutines.delay
+import com.paricheh.metronome.tuner.ui.tuner.component.TunerSlider
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.cd_back
 import metronome.shared.generated.resources.tuner_title
@@ -59,10 +69,15 @@ fun TunerScreen(
     viewModel: TunerViewModel = koinViewModel(),
 ) {
     val tunerState by viewModel.tunerState.collectAsStateWithLifecycle()
+    val selectedNote by viewModel.selectedNote.collectAsStateWithLifecycle()
 
     TunerScreenContent(
         state = tunerState,
         currentInstrument = viewModel.currentInstrument,
+        selectedNote = selectedNote,
+        onSelectNote = {
+            viewModel.selectNote(it)
+        },
         onBackClick = { navController.popBackStack() }
     )
 }
@@ -72,19 +87,51 @@ fun TunerScreen(
 fun TunerScreenContent(
     state: TunerState,
     currentInstrument: Instrument,
+    selectedNote: NoteInfo?,
+    onSelectNote: (NoteInfo?) -> Unit,
     onBackClick: () -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     Scaffold(
-        containerColor = Color.Black,
+        modifier = Modifier.drawWithContent {
+            drawContent()
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(
+                        primaryColor.copy(alpha = 0.1f),
+                        Color.Transparent,
+                    ),
+                    radius = 120.dp.toPx(),
+                    center = Offset(
+                        x = center.x,
+                        y = 82.dp.toPx()
+                    )
+                ),
+                radius = 120.dp.toPx(),
+                center = Offset(
+                    x = center.x,
+                    y = 82.dp.toPx()
+                )
+
+            )
+        },
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Black
                 ),
                 title = {
                     Text(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(
+                                horizontal = 12.dp,
+                                vertical = 4.dp
+                            ),
                         text = stringResource(Res.string.tuner_title),
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
@@ -98,22 +145,28 @@ fun TunerScreenContent(
                     }
                 },
                 actions = {
-                    Row(
-                        modifier = Modifier.padding(end = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    IconButton(
+                        onClick = {
+                            if (selectedNote != null) {
+                                onSelectNote(null)
+                            } else {
+                                onSelectNote(currentInstrument.notes.firstOrNull())
+                            }
+                        }
                     ) {
-
-                        Text(
-                            text = "خودکار",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Switch(
-                            checked = true,
-                            onCheckedChange = null
-                        )
+                        AnimatedContent(selectedNote == null) {
+                            if (it) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Sensors,
+                                    contentDescription = null
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Rounded.SensorsOff,
+                                    contentDescription = null
+                                )
+                            }
+                        }
                     }
                 }
             )
@@ -122,7 +175,9 @@ fun TunerScreenContent(
         Box(modifier = Modifier.padding(scaffoldPadding)) {
             TunerMainDisplay(
                 state = state,
-                currentInstrument = currentInstrument
+                currentInstrument = currentInstrument,
+                selectedNote = selectedNote,
+                onSelectNote = onSelectNote,
             )
         }
     }
@@ -132,33 +187,10 @@ fun TunerScreenContent(
 fun TunerMainDisplay(
     state: TunerState,
     currentInstrument: Instrument,
+    selectedNote: NoteInfo?,
+    onSelectNote: (NoteInfo?) -> Unit,
 ) {
-    var smoothedDetectResult by remember { mutableStateOf<TunerResult?>(null) }
-    val rawDetectedResult = (state as? TunerState.Detected)?.result
-
-// 2. Use LaunchedEffect to filter the raw state changes
-    LaunchedEffect(rawDetectedResult) {
-        if (rawDetectedResult != null) {
-            // CASE A: Signal appeared
-            if (smoothedDetectResult == null) {
-                // Wait to ensure it's not a 2ms noise spike.
-                // If rawDetectedResult becomes null before this delay finishes,
-                // the coroutine cancels and smoothedDetectResult stays null.
-                delay(30)
-            }
-
-            // If it survived the delay (or was already non-null), update the UI instantly
-            smoothedDetectResult = rawDetectedResult
-
-        } else {
-            // CASE B: Signal lost
-            // Wait before clearing the UI to prevent flickering from brief tracking dropouts.
-            // If a valid pitch comes back within 100ms, this cancels and keeps the old value.
-            delay(100)
-            smoothedDetectResult = null
-        }
-    }
-
+    val detectResult = (state as? TunerState.Detected)?.result
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -198,34 +230,58 @@ fun TunerMainDisplay(
 
             Spacer(Modifier.weight(1f))
 
-            smoothedDetectResult?.frequency?.let {
+            detectResult?.frequency?.let {
                 Text(
                     text = "${it.roundToInt()} Hz",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+
         }
 
         Spacer(modifier = Modifier.height(68.dp))
 
-        ValueHistorySlider(
-            currentValue = smoothedDetectResult?.centsDifference,
-            min = -50f,
-            max = 50f,
-            goodThreshold = 10f,
-            warningThreshold = 20f,
-            minText = "-50",
-            maxText = "50",
-            title = smoothedDetectResult?.note?.displayName.orEmpty(),
-            modifier = Modifier.fillMaxWidth()
+        TunerSlider(
+            centDifference = detectResult?.centsDifference?.coerceIn(
+                minimumValue = -50f,
+                maximumValue = 50f,
+            ),
+            title = {
+                Row(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    AnimatedVisibility(selectedNote != null) {
+                        Icon(
+                            modifier = Modifier.size(16.dp),
+                            imageVector = Icons.Outlined.Lock,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Text(
+                        text = selectedNote?.note?.displayName
+                            ?: detectResult?.note?.displayName.orEmpty(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+            },
+            onTuned = {}
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
         Spacer(modifier = Modifier.weight(1f))
 
         val surfaceColor = MaterialTheme.colorScheme.surface
+        val lazyState = rememberLazyListState()
+
         LazyColumn(
+            state = lazyState,
             modifier = Modifier
                 .drawWithContent {
                     drawContent()
@@ -247,42 +303,91 @@ fun TunerMainDisplay(
                 }
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            currentInstrument.notes.forEachIndexed { index, info ->
-                item {
-                    Box(
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.large)
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = info.note.displayName,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+            stickyHeader {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    surfaceColor,
+                                    surfaceColor,
+                                    Color.Transparent,
+                                )
+                            ),
                         )
+                        .padding(vertical = 24.dp)
+                ) {
+                    HorizontalDivider()
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "انتخاب کلاویه",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Start
+                    )
+                }
+            }
+
+            itemsIndexed(currentInstrument.notes) { index, note ->
+                val isSelectedTransition = updateTransition(note == selectedNote)
+                val backgroundColor by isSelectedTransition.animateColor {
+                    if (it) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.secondaryContainer
                     }
                 }
-                if (info.octave != currentInstrument.notes[minOf(index + 1, 87)].octave) {
-                    stickyHeader {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surface),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "اوکتاو ${currentInstrument.notes[index + 1].octave}",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
 
-                            HorizontalDivider(modifier = Modifier.fillMaxWidth())
-                        }
+                val textColor by isSelectedTransition.animateColor {
+                    if (it) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSecondaryContainer
                     }
+                }
+
+                val verticalPadding by isSelectedTransition.animateDp {
+                    if (it) {
+                        20.dp
+                    } else {
+                        16.dp
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(backgroundColor)
+                        .clickable {
+                            onSelectNote(note)
+                        }
+                        .padding(vertical = verticalPadding)
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Text(
+                        text = index.toString(),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = textColor
+                    )
+
+                    Text(
+                        text = note.note.displayName,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = textColor
+                    )
+
+                    Text(
+                        text = "${note.frequency.roundToInt()} Hz",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

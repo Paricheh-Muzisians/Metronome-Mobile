@@ -21,17 +21,21 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.material.icons.twotone.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +55,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -84,6 +90,7 @@ import metronome.shared.generated.resources.onboarding_start_desc
 import metronome.shared.generated.resources.onboarding_start_title
 import metronome.shared.generated.resources.onboarding_tempo_desc
 import metronome.shared.generated.resources.onboarding_tempo_title
+import metronome.shared.generated.resources.tuner_title
 import metronome.shared.generated.resources.vertical_illustration_area
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -242,14 +249,50 @@ fun MetronomeScreen(
         }
     }
 
+    val primaryColor = MaterialTheme.colorScheme.primary
     Scaffold(
+        modifier = Modifier.drawWithContent {
+            drawContent()
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(
+                        primaryColor.copy(alpha = 0.1f),
+                        Color.Transparent,
+                    ),
+                    radius = 120.dp.toPx(),
+                    center = Offset(
+                        x = center.x,
+                        y = 82.dp.toPx()
+                    )
+                ),
+                radius = 120.dp.toPx(),
+                center = Offset(
+                    x = center.x,
+                    y = 82.dp.toPx()
+                )
+
+            )
+        },
         containerColor = Color.Black,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Black
                 ),
-                title = {},
+                title = {
+                    Text(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(
+                                horizontal = 12.dp,
+                                vertical = 4.dp
+                            ),
+                        text = "مترونوم",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -258,7 +301,7 @@ fun MetronomeScreen(
                     ) {
                         //TODO Chnage to tuner icon
                         Icon(
-                            imageVector = Icons.TwoTone.Tune,
+                            imageVector = Icons.Rounded.Tune,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             contentDescription = "Tuner"
                         )
@@ -329,24 +372,26 @@ fun MetronomeScreen(
                     fadeIn() togetherWith fadeOut()
                 }
             ) {
-                Column(
-                    modifier = Modifier.padding(top = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     val musicianTempoText = buildAnnotatedString {
                         append(stringResource(currentTempoMarkings.titleEnglish()))
                     }
+                    Text(
+                        text = stringResource(currentTempoMarkings.titlePersian()),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = NonCommonTypography.PersianSonatiHeader
+                    )
 
                     Text(
                         text = musicianTempoText,
                         color = MaterialTheme.colorScheme.onSurface,
                         style = NonCommonTypography.EnglishSontatiHeader,
-                    )
-
-                    Text(
-                        text = stringResource(currentTempoMarkings.titlePersian()),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = NonCommonTypography.PersianSonatiHeader
                     )
                 }
             }

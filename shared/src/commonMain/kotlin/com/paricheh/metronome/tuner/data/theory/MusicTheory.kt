@@ -21,21 +21,6 @@ enum class MusicalNote(val displayName: String) {
     La("La"),
     LaSharp("La#"),
     Si("Si");
-
-    fun persianNameRes(): StringResource = when (this) {
-        Do -> Res.string.note_do
-        DoSharp -> Res.string.note_do_sharp
-        Re -> Res.string.note_re
-        ReSharp -> Res.string.note_re_sharp
-        Mi -> Res.string.note_mi
-        Fa -> Res.string.note_fa
-        FaSharp -> Res.string.note_fa_sharp
-        Sol -> Res.string.note_sol
-        SolSharp -> Res.string.note_sol_sharp
-        La -> Res.string.note_la
-        LaSharp -> Res.string.note_la_sharp
-        Si -> Res.string.note_si
-    }
 }
 
 /**

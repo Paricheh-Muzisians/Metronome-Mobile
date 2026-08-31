@@ -1,7 +1,7 @@
 package com.paricheh.metronome.tuner.data.tuner
 
 import com.paricheh.metronome.tuner.data.theory.MusicalNote
-import com.paricheh.metronome.tuner.data.theory.TuningStatus
+import com.paricheh.metronome.tuner.data.theory.NoteInfo
 
 /**
  * Domain model representing the detailed state of a detected pitch.
@@ -11,8 +11,7 @@ data class TunerResult(
     val note: MusicalNote,
     val octave: Int,
     val centsDifference: Float,
-    val tuningStatus: TuningStatus,
-    val confidence: Float
+    val confidence: Float,
 )
 
 /**
@@ -26,5 +25,5 @@ interface Tuner {
      * @param confidence The detection confidence.
      * @return [TunerResult] if a note is detected, null otherwise.
      */
-    fun process(frequency: Float, confidence: Float): TunerResult?
+    fun process(frequency: Float, confidence: Float, targetNote: NoteInfo?): TunerResult?
 }

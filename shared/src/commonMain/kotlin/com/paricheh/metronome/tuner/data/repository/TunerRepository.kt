@@ -1,5 +1,6 @@
 package com.paricheh.metronome.tuner.data.repository
 
+import com.paricheh.metronome.tuner.data.theory.NoteInfo
 import com.paricheh.metronome.tuner.data.tuner.TunerState
 import kotlinx.coroutines.flow.Flow
 
@@ -12,7 +13,7 @@ interface TunerRepository {
     /**
      * Observes the current state of the tuner.
      */
-    fun observeTuner(): Flow<TunerState>
+    fun observeTuner(targetNote: NoteInfo?): Flow<TunerState>
 
     /**
      * Starts the tuning process.

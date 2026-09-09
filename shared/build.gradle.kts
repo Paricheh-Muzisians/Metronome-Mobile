@@ -60,6 +60,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.appmetrica.analytics)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

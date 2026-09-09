@@ -76,6 +76,7 @@ dependencies {
     debugImplementation(libs.compose.uiTooling)
     implementation(libs.androidx.activity.compose)
     implementation(libs.koin.android)
+    implementation(libs.appmetrica.analytics)
 }
 
 fun loadValueFromProperties(key: String, propName: String = "local.properties"): String? {

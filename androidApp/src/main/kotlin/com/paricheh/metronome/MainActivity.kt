@@ -11,11 +11,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.paricheh.metronome.core.analytics.AnalyticsManager
 import com.paricheh.metronome.core.analytics.LocalAnalyticsManager
+import com.paricheh.metronome.core.platform.LocalPlatformActionHandler
+import com.paricheh.metronome.core.platform.PlatformActionHandler
 import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
     private val analyticsManager: AnalyticsManager by inject()
+    private val platformActionHandler: PlatformActionHandler by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +36,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CompositionLocalProvider(
-                LocalAnalyticsManager provides analyticsManager
+                LocalAnalyticsManager provides analyticsManager,
+                LocalPlatformActionHandler provides platformActionHandler
             ) {
                 App()
             }

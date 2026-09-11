@@ -8,6 +8,8 @@ import com.paricheh.metronome.core.soundplayer.AndroidMetronomeSoundPlayer
 import com.paricheh.metronome.core.soundplayer.MetronomeSoundPlayer
 import com.paricheh.metronome.core.vibrator.AndroidMetronomeVibrator
 import com.paricheh.metronome.core.vibrator.MetronomeVibrator
+import com.paricheh.metronome.core.platform.AndroidPlatformActionHandler
+import com.paricheh.metronome.core.platform.PlatformActionHandler
 import com.paricheh.metronome.metronome.data.AndroidMetronomeSettings
 import com.paricheh.metronome.metronome.data.MetronomeSettings
 import com.paricheh.metronome.rating.data.preferences.AndroidRatingPreferences
@@ -22,6 +24,8 @@ val metronomeAndroidModule = module {
     single<MetronomeSoundPlayer> { AndroidMetronomeSoundPlayer(get()) }
     single<MetronomeVibrator> { AndroidMetronomeVibrator(get()) }
     single<MetronomeSettings> { AndroidMetronomeSettings(get()) }
+    single<PlatformActionHandler> { AndroidPlatformActionHandler(get()) }
+
     single { AndroidRatingPreferences(get()) } bind RatingPreferences::class
 
     single<AnalyticsManager> {

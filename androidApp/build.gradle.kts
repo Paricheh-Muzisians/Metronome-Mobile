@@ -38,7 +38,7 @@ android {
         setVersion(
             epoch = 1,
             major = 1,
-            minor = 1,
+            minor = 2,
             patch = 0,
             offset = 0
         )

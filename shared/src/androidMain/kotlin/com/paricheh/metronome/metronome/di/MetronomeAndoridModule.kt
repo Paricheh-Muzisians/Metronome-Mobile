@@ -10,13 +10,19 @@ import com.paricheh.metronome.core.vibrator.AndroidMetronomeVibrator
 import com.paricheh.metronome.core.vibrator.MetronomeVibrator
 import com.paricheh.metronome.metronome.data.AndroidMetronomeSettings
 import com.paricheh.metronome.metronome.data.MetronomeSettings
+import com.paricheh.metronome.rating.data.preferences.AndroidRatingPreferences
+import com.paricheh.metronome.rating.data.preferences.RatingPreferences
+import com.paricheh.metronome.rating.di.ratingSharedModule
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val metronomeAndroidModule = module {
+    includes(ratingSharedModule)
     single<MetronomeSoundPlayer> { AndroidMetronomeSoundPlayer(get()) }
     single<MetronomeVibrator> { AndroidMetronomeVibrator(get()) }
     single<MetronomeSettings> { AndroidMetronomeSettings(get()) }
+    single { AndroidRatingPreferences(get()) } bind RatingPreferences::class
 
     single<AnalyticsManager> {
         val context = androidContext()

@@ -7,6 +7,7 @@ import com.paricheh.metronome.core.getTempoMarkingByBpm
 import com.paricheh.metronome.core.soundplayer.MetronomeSoundPlayer
 import com.paricheh.metronome.core.vibrator.MetronomeVibrator
 import com.paricheh.metronome.metronome.data.MetronomeSettings
+import com.paricheh.metronome.rating.data.repository.RatingRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,7 @@ class MetronomeViewModel(
     private val settings: MetronomeSettings,
     private val soundPlayer: MetronomeSoundPlayer,
     private val vibrator: MetronomeVibrator,
+    private val ratingRepository: RatingRepository,
 ) : ViewModel() {
     var setTempoJob: Job? = null
     val metronomePreferences = settings.preferences
@@ -98,6 +100,11 @@ class MetronomeViewModel(
     }
 
     fun stopMetronome() {
+        viewModelScope.launch {
+            if (isMetronomeStarted.value) {
+                ratingRepository.increaseRatingPoint()
+            }
+        }
         _pendulumAngle.value = 0f
         _isMetronomeStarted.value = false
     }

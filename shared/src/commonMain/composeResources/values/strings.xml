@@ -114,4 +114,10 @@
 
     <!-- BPM -->
     <string name="bpm">بی‌پی‌ام</string>
+
+    <!-- Rating -->
+    <string name="rating_dialog_title">یه امتیازمون نشه؟!</string>
+    <string name="rating_dialog_description">فعلا فقط مترونوم ولی کار با هم زیاد داریم.</string>
+    <string name="rating_dialog_submit">ثبت نظر</string>
+    <string name="rating_dialog_not_now">فعلاً نه</string>
 </resources>

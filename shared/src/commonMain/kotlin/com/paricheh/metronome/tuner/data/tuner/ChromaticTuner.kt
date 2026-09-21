@@ -1,26 +1,22 @@
 package com.paricheh.metronome.tuner.data.tuner
 
-import com.paricheh.metronome.tuner.data.theory.Instrument
-import com.paricheh.metronome.tuner.data.theory.NoteInfo
+import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.model.TunerResult
 import kotlin.math.abs
 import kotlin.math.log2
 
-/**
- * Implementation of [Tuner] that finds the nearest note on a given [Instrument].
- */
-class ChromaticTuner(
-    private val instrument: Instrument,
-) : Tuner {
+class ChromaticTuner : Tuner {
 
     override fun process(
         frequency: Float,
         confidence: Float,
         targetNote: NoteInfo?,
+        notes: List<NoteInfo>,
     ): TunerResult? {
         if (frequency <= 0f || confidence < 0.7) return null
 
         val note = targetNote
-            ?: instrument.notes.minByOrNull { abs(it.frequency - frequency) }
+            ?: notes.minByOrNull { abs(it.frequency - frequency) }
             ?: return null
 
         // Calculate cents difference: cents = 1200 * log2(f1 / f2)

@@ -1,10 +1,12 @@
 package com.paricheh.metronome.tuner.ui.tuner
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,10 +14,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,10 +25,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.SensorsOff
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -51,10 +53,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.paricheh.metronome.tuner.data.theory.Instrument
-import com.paricheh.metronome.tuner.data.theory.NoteInfo
-import com.paricheh.metronome.tuner.data.tuner.TunerState
+import com.paricheh.metronome.tuner.model.TunerState
+import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.ui.tuner.component.Guitar6StringInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.TunerSlider
+import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
+import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
+import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
+import com.paricheh.metronome.tuner.ui.utils.instrument.getTitle
+import com.paricheh.metronome.tuner.ui.utils.instrument.getTypeText
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.cd_back
 import metronome.shared.generated.resources.tuner_title
@@ -70,10 +77,11 @@ fun TunerScreen(
 ) {
     val tunerState by viewModel.tunerState.collectAsStateWithLifecycle()
     val selectedNote by viewModel.selectedNote.collectAsStateWithLifecycle()
+    val selectedInstrument by viewModel.selectedInstrument.collectAsStateWithLifecycle()
 
     TunerScreenContent(
         state = tunerState,
-        currentInstrument = viewModel.currentInstrument,
+        currentInstrument = selectedInstrument,
         selectedNote = selectedNote,
         onSelectNote = {
             viewModel.selectNote(it)
@@ -86,7 +94,7 @@ fun TunerScreen(
 @Composable
 fun TunerScreenContent(
     state: TunerState,
-    currentInstrument: Instrument,
+    currentInstrument: Instrument?,
     selectedNote: NoteInfo?,
     onSelectNote: (NoteInfo?) -> Unit,
     onBackClick: () -> Unit,
@@ -150,7 +158,10 @@ fun TunerScreenContent(
                             if (selectedNote != null) {
                                 onSelectNote(null)
                             } else {
-                                onSelectNote(currentInstrument.notes.firstOrNull())
+                                onSelectNote(
+                                    currentInstrument?.notes
+                                        ?.firstOrNull()
+                                )
                             }
                         }
                     ) {
@@ -173,12 +184,21 @@ fun TunerScreenContent(
         }
     ) { scaffoldPadding ->
         Box(modifier = Modifier.padding(scaffoldPadding)) {
-            TunerMainDisplay(
-                state = state,
-                currentInstrument = currentInstrument,
-                selectedNote = selectedNote,
-                onSelectNote = onSelectNote,
-            )
+            AnimatedContent(
+                targetState = currentInstrument,
+                transitionSpec = { fadeIn() togetherWith fadeOut() }
+            ) { instrument ->
+                if (instrument == null) {
+                    CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+                } else {
+                    TunerMainDisplay(
+                        state = state,
+                        currentInstrument = instrument,
+                        selectedNote = selectedNote,
+                        onSelectNote = onSelectNote,
+                    )
+                }
+            }
         }
     }
 }
@@ -210,12 +230,12 @@ fun TunerMainDisplay(
                 ) {
                     Column {
                         Text(
-                            text = "پیانو",
+                            text = stringResource(currentInstrument.getTitle()),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "۸۸ کلید",
+                            text = stringResource(currentInstrument.getTypeText()),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -248,147 +268,161 @@ fun TunerMainDisplay(
                 maximumValue = 50f,
             ),
             title = {
-                Row(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    AnimatedVisibility(selectedNote != null) {
-                        Icon(
-                            modifier = Modifier.size(16.dp),
-                            imageVector = Icons.Outlined.Lock,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Text(
-                        text = selectedNote?.note?.displayName
-                            ?: detectResult?.note?.displayName.orEmpty(),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
+                Text(
+                    text = detectResult?.centsDifference?.coerceIn(
+                        minimumValue = -50f,
+                        maximumValue = 50f,
                     )
-                }
-
+                        ?.toInt()
+                        ?.toString()
+                        .orEmpty(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             },
             onTuned = {}
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        val surfaceColor = MaterialTheme.colorScheme.surface
-        val lazyState = rememberLazyListState()
+        when (currentInstrument) {
+            is Guitar6String -> {
+                Guitar6StringInstrumentSection(
+                    currentInstrument = currentInstrument,
+                    selectedNote = selectedNote,
+                    onSelectNote = onSelectNote
+                )
+            }
 
-        LazyColumn(
-            state = lazyState,
-            modifier = Modifier
-                .drawWithContent {
-                    drawContent()
-                    drawRect(
+            is Piano88 -> {
+                PianoInstrument(
+                    currentInstrument = currentInstrument,
+                    selectedNote = selectedNote,
+                    onSelectNote = onSelectNote
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PianoInstrument(
+    currentInstrument: Instrument,
+    selectedNote: NoteInfo?,
+    onSelectNote: (NoteInfo?) -> Unit,
+) {
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val lazyState = rememberLazyListState()
+
+    LazyColumn(
+        state = lazyState,
+        modifier = Modifier
+            .drawWithContent {
+                drawContent()
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            Color.Transparent,
+                            Color.Transparent,
+                            Color.Transparent,
+                            Color.Transparent,
+                            surfaceColor,
+                        )
+                    ),
+                    size = Size(
+                        height = size.height,
+                        width = size.width
+                    ),
+                )
+            }
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        stickyHeader {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .background(
                         brush = Brush.verticalGradient(
                             listOf(
-                                Color.Transparent,
-                                Color.Transparent,
-                                Color.Transparent,
-                                Color.Transparent,
                                 surfaceColor,
+                                surfaceColor,
+                                Color.Transparent,
                             )
                         ),
-                        size = Size(
-                            height = size.height,
-                            width = size.width
-                        ),
                     )
-                }
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            stickyHeader {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    surfaceColor,
-                                    surfaceColor,
-                                    Color.Transparent,
-                                )
-                            ),
-                        )
-                        .padding(vertical = 24.dp)
-                ) {
-                    HorizontalDivider()
+                    .padding(vertical = 24.dp)
+            ) {
+                HorizontalDivider()
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = "انتخاب کلاویه",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Start
-                    )
+                Text(
+                    text = "انتخاب کلاویه",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Start
+                )
+            }
+        }
+
+        itemsIndexed(currentInstrument.notes) { index, note ->
+            val isSelectedTransition = updateTransition(note == selectedNote)
+            val backgroundColor by isSelectedTransition.animateColor {
+                if (it) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.secondaryContainer
                 }
             }
 
-            itemsIndexed(currentInstrument.notes) { index, note ->
-                val isSelectedTransition = updateTransition(note == selectedNote)
-                val backgroundColor by isSelectedTransition.animateColor {
-                    if (it) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.secondaryContainer
+            val textColor by isSelectedTransition.animateColor {
+                if (it) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                }
+            }
+
+            val verticalPadding by isSelectedTransition.animateDp {
+                if (it) {
+                    20.dp
+                } else {
+                    16.dp
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(backgroundColor)
+                    .clickable {
+                        onSelectNote(note)
                     }
-                }
+                    .padding(vertical = verticalPadding)
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Text(
+                    text = index.toString(),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = textColor
+                )
 
-                val textColor by isSelectedTransition.animateColor {
-                    if (it) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSecondaryContainer
-                    }
-                }
+                Text(
+                    text = note.note.displayName,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = textColor
+                )
 
-                val verticalPadding by isSelectedTransition.animateDp {
-                    if (it) {
-                        20.dp
-                    } else {
-                        16.dp
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .clip(MaterialTheme.shapes.large)
-                        .background(backgroundColor)
-                        .clickable {
-                            onSelectNote(note)
-                        }
-                        .padding(vertical = verticalPadding)
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Text(
-                        text = index.toString(),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = textColor
-                    )
-
-                    Text(
-                        text = note.note.displayName,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = textColor
-                    )
-
-                    Text(
-                        text = "${note.frequency.roundToInt()} Hz",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    text = "${note.frequency.roundToInt()} Hz",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

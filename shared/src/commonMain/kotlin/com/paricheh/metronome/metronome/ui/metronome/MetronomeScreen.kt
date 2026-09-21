@@ -16,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,8 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.twotone.Settings
-import androidx.compose.material.icons.twotone.Tune
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,7 +38,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -71,9 +69,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.paricheh.metronome.core.titleEnglish
 import com.paricheh.metronome.core.titlePersian
-import com.paricheh.metronome.navigation.TunerScreens
 import com.paricheh.metronome.designsystem.NonCommonTypography
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
+import com.paricheh.metronome.navigation.TunerScreens
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.bpm
 import metronome.shared.generated.resources.cd_settings
@@ -86,7 +84,6 @@ import metronome.shared.generated.resources.onboarding_start_desc
 import metronome.shared.generated.resources.onboarding_start_title
 import metronome.shared.generated.resources.onboarding_tempo_desc
 import metronome.shared.generated.resources.onboarding_tempo_title
-import metronome.shared.generated.resources.tuner_title
 import metronome.shared.generated.resources.vertical_illustration_area
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

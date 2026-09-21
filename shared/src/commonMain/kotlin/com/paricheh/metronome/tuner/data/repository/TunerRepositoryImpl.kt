@@ -3,9 +3,9 @@ package com.paricheh.metronome.tuner.data.repository
 import com.paricheh.metronome.core.audio.AudioEngine
 import com.paricheh.metronome.tuner.data.detector.PitchDetector
 import com.paricheh.metronome.tuner.data.normalizer.FrequencyNormalizer
-import com.paricheh.metronome.tuner.data.theory.NoteInfo
 import com.paricheh.metronome.tuner.data.tuner.Tuner
-import com.paricheh.metronome.tuner.data.tuner.TunerState
+import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.model.TunerState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -21,7 +21,10 @@ class TunerRepositoryImpl(
     private val tuner: Tuner,
 ) : TunerRepository {
 
-    override fun observeTuner(targetNote: NoteInfo?): Flow<TunerState> {
+    override fun observeTuner(
+        targetNote: NoteInfo?,
+        notes: List<NoteInfo>,
+    ): Flow<TunerState> {
         return audioEngine.observeAudioFrames()
             .map { frame ->
                 val pitchResult = pitchDetector.detect(frame)
@@ -33,7 +36,8 @@ class TunerRepositoryImpl(
                 val tunerResult = tuner.process(
                     frequency = normalizedFreq,
                     confidence = pitchResult.confidence,
-                    targetNote = targetNote
+                    targetNote = targetNote,
+                    notes = notes,
                 )
 
                 if (tunerResult != null) {

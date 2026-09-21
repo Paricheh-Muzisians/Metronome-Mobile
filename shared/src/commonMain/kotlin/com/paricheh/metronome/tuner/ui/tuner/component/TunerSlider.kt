@@ -173,8 +173,8 @@ fun TunerSlider(
                             centDifference?.roundToInt()?.let {
                                 Text(
                                     modifier = Modifier.align(Alignment.Center),
-                                    text = it.toString(),
-                                    style = MaterialTheme.typography.labelSmall,
+                                    text = "+",
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSecondary
                                 )
                             }

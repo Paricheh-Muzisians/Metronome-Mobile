@@ -141,4 +141,12 @@
     <string name="rating_dialog_description">فعلا فقط مترونوم ولی کار با هم زیاد داریم.</string>
     <string name="rating_dialog_submit">ثبت نظر</string>
     <string name="rating_dialog_not_now">فعلاً نه</string>
+
+
+    <string name="guitar">گیتار</string>
+    <string name="piano">پیانو</string>
+    <string name="standard">استاندارد</string>
+    <string name="eighteen_eight_key_piano">۸۸ کلید</string>
+
+
 </resources>

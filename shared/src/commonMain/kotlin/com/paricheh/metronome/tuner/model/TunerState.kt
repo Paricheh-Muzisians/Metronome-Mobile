@@ -1,4 +1,4 @@
-package com.paricheh.metronome.tuner.data.tuner
+package com.paricheh.metronome.tuner.model
 
 /**
  * Represents the high-level state of the tuner.

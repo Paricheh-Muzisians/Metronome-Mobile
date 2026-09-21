@@ -6,24 +6,17 @@ import com.paricheh.metronome.tuner.data.normalizer.FrequencyNormalizer
 import com.paricheh.metronome.tuner.data.normalizer.SimpleFrequencyNormalizer
 import com.paricheh.metronome.tuner.data.repository.TunerRepository
 import com.paricheh.metronome.tuner.data.repository.TunerRepositoryImpl
-import com.paricheh.metronome.tuner.data.theory.EqualTemperament
-import com.paricheh.metronome.tuner.data.theory.Instrument
-import com.paricheh.metronome.tuner.data.theory.Piano88
-import com.paricheh.metronome.tuner.data.theory.Temperament
 import com.paricheh.metronome.tuner.data.tuner.ChromaticTuner
 import com.paricheh.metronome.tuner.data.tuner.Tuner
 import com.paricheh.metronome.tuner.ui.tuner.TunerViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val tunerModule = module {
-    single<Temperament> { EqualTemperament() }
-    single<Instrument> { Piano88(get()) }
-
     single<PitchDetector> { YinPitchDetector() }
     single<FrequencyNormalizer> { SimpleFrequencyNormalizer() }
-    single<Tuner> { ChromaticTuner(get()) }
+    single<Tuner> { ChromaticTuner() }
 
     single<TunerRepository> { TunerRepositoryImpl(get(), get(), get(), get()) }
-    viewModel<TunerViewModel> { TunerViewModel(get(),get()) }
+    viewModelOf(::TunerViewModel)
 }

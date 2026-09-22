@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,15 +56,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.paricheh.metronome.tuner.model.TunerState
+import com.composeunstyled.SheetDetent
+import com.composeunstyled.rememberModalBottomSheetState
 import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.tuner.component.Guitar6StringInstrumentSection
+import com.paricheh.metronome.tuner.ui.tuner.component.InstrumentSelectorBottomSheet
 import com.paricheh.metronome.tuner.ui.tuner.component.TunerSlider
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTitle
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTypeText
+import kotlinx.coroutines.launch
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.cd_back
 import metronome.shared.generated.resources.tuner_title
@@ -77,9 +82,31 @@ fun TunerScreen(
     navController: NavController,
     viewModel: TunerViewModel = koinViewModel(),
 ) {
+    val scope = rememberCoroutineScope()
     val tunerState by viewModel.tunerState.collectAsStateWithLifecycle()
     val selectedNote by viewModel.selectedNote.collectAsStateWithLifecycle()
     val selectedInstrument by viewModel.selectedInstrument.collectAsStateWithLifecycle()
+    val allInstruments by viewModel.allInstruments.collectAsStateWithLifecycle()
+
+    val instrumentSelectorSheetState = rememberModalBottomSheetState(
+        initialDetent = SheetDetent.Hidden
+    )
+
+    InstrumentSelectorBottomSheet(
+        state = instrumentSelectorSheetState,
+        instruments = allInstruments,
+        onDismiss = {
+            scope.launch {
+                instrumentSelectorSheetState.animateTo(SheetDetent.Hidden)
+            }
+        },
+        onInstrumentSelected = {
+            viewModel.selectInstrument(it)
+            scope.launch {
+                instrumentSelectorSheetState.animateTo(SheetDetent.Hidden)
+            }
+        }
+    )
 
     TunerScreenContent(
         state = tunerState,
@@ -87,6 +114,11 @@ fun TunerScreen(
         selectedNote = selectedNote,
         onSelectNote = {
             viewModel.selectNote(it)
+        },
+        onInstrumentPickRequest = {
+            scope.launch {
+                instrumentSelectorSheetState.animateTo(SheetDetent.FullyExpanded)
+            }
         },
         onBackClick = { navController.popBackStack() }
     )
@@ -99,6 +131,7 @@ fun TunerScreenContent(
     currentInstrument: Instrument?,
     selectedNote: NoteInfo?,
     onSelectNote: (NoteInfo?) -> Unit,
+    onInstrumentPickRequest: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -190,13 +223,19 @@ fun TunerScreenContent(
                 transitionSpec = { fadeIn() togetherWith fadeOut() }
             ) { instrument ->
                 if (instrument == null) {
-                    CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 } else {
                     TunerMainDisplay(
                         state = state,
                         currentInstrument = instrument,
                         selectedNote = selectedNote,
                         onSelectNote = onSelectNote,
+                        onInstrumentPickRequest = onInstrumentPickRequest
                     )
                 }
             }
@@ -209,6 +248,7 @@ fun TunerMainDisplay(
     state: TunerState,
     currentInstrument: Instrument,
     selectedNote: NoteInfo?,
+    onInstrumentPickRequest: () -> Unit,
     onSelectNote: (NoteInfo?) -> Unit,
 ) {
     val detectResult = (state as? TunerState.Detected)?.result
@@ -245,7 +285,10 @@ fun TunerMainDisplay(
                 .fillMaxWidth()
         ) {
             TextButton(
-                onClick = {},
+                shape = MaterialTheme.shapes.medium,
+                onClick = {
+                    onInstrumentPickRequest()
+                },
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -303,21 +346,26 @@ fun TunerMainDisplay(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        when (currentInstrument) {
-            is Guitar6String -> {
-                Guitar6StringInstrumentSection(
-                    currentInstrument = currentInstrument,
-                    selectedNote = selectedNote ?: detectResult?.noteInfo,
-                    onSelectNote = onSelectNote
-                )
-            }
+        AnimatedContent(
+            targetState = currentInstrument,
+            transitionSpec = { fadeIn() togetherWith fadeOut() }
+        ) {
+            when (it) {
+                is Guitar6String -> {
+                    Guitar6StringInstrumentSection(
+                        currentInstrument = it,
+                        selectedNote = selectedNote ?: detectResult?.noteInfo,
+                        onSelectNote = onSelectNote
+                    )
+                }
 
-            is Piano88 -> {
-                PianoInstrument(
-                    currentInstrument = currentInstrument,
-                    selectedNote = selectedNote ?: detectResult?.noteInfo,
-                    onSelectNote = onSelectNote
-                )
+                is Piano88 -> {
+                    PianoInstrument(
+                        currentInstrument = it,
+                        selectedNote = selectedNote ?: detectResult?.noteInfo,
+                        onSelectNote = onSelectNote
+                    )
+                }
             }
         }
     }

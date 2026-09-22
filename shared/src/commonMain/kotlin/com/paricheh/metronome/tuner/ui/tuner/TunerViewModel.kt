@@ -34,21 +34,40 @@ class TunerViewModel(
     private val _selectedInstrument = MutableStateFlow<Instrument?>(null)
     val selectedInstrument = _selectedInstrument.asStateFlow()
 
+    private val _allInstruments = MutableStateFlow<List<Instrument>>(listOf())
+    val allInstruments = _allInstruments.asStateFlow()
+
+
     init {
         observeInstrument()
+        getAllInstruments()
         handleInstrumentChange()
         startTuner()
     }
 
     fun startTuner() {
         viewModelScope.launch {
-            tunerRepository.start()
+            tunerRepository.startTuner()
         }
     }
 
     fun selectNote(note: NoteInfo?) {
         viewModelScope.launch {
             _selectedNote.emit(note)
+        }
+    }
+
+    fun selectInstrument(instrument: Instrument) {
+        viewModelScope.launch {
+            preferences.setSelectedInstrumentKey(instrument.key)
+        }
+    }
+
+    private fun getAllInstruments() {
+        viewModelScope.launch {
+            _allInstruments.emit(
+                tunerRepository.getAllInstruments()
+            )
         }
     }
 

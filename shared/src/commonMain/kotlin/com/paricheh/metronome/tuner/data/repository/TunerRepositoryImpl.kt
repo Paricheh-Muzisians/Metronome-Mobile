@@ -6,6 +6,9 @@ import com.paricheh.metronome.tuner.data.normalizer.FrequencyNormalizer
 import com.paricheh.metronome.tuner.data.tuner.Tuner
 import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.model.TunerState
+import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
+import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
+import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -52,14 +55,21 @@ class TunerRepositoryImpl(
             .distinctUntilChanged()
     }
 
-    override suspend fun start() {
+    override suspend fun startTuner() {
         normalizer.reset()
         audioEngine.start()
     }
 
-    override suspend fun stop() {
+    override suspend fun stopTuner() {
         audioEngine.stop()
     }
 
-    override fun isActive(): Boolean = audioEngine.isRunning()
+    override fun isTuning(): Boolean = audioEngine.isRunning()
+
+    override fun getAllInstruments(): List<Instrument> {
+        return listOf(
+            Piano88(),
+            Guitar6String()
+        )
+    }
 }

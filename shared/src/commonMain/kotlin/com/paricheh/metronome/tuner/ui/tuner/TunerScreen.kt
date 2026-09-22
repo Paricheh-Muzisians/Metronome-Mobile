@@ -227,9 +227,11 @@ fun TunerMainDisplay(
         }
     }
 
-    val frequencyText by remember(detectResult?.frequency) {
+    val frequencyText by remember(detectResult?.noteInfo?.frequency) {
         derivedStateOf {
-            detectResult?.frequency?.let { (it * 10).roundToInt() / 10f }
+            detectResult?.noteInfo
+                ?.frequency
+                ?.let { (it * 10).roundToInt() / 10f }
         }
     }
 
@@ -305,7 +307,7 @@ fun TunerMainDisplay(
             is Guitar6String -> {
                 Guitar6StringInstrumentSection(
                     currentInstrument = currentInstrument,
-                    selectedNote = selectedNote,
+                    selectedNote = selectedNote ?: detectResult?.noteInfo,
                     onSelectNote = onSelectNote
                 )
             }
@@ -313,7 +315,7 @@ fun TunerMainDisplay(
             is Piano88 -> {
                 PianoInstrument(
                     currentInstrument = currentInstrument,
-                    selectedNote = selectedNote,
+                    selectedNote = selectedNote ?: detectResult?.noteInfo,
                     onSelectNote = onSelectNote
                 )
             }

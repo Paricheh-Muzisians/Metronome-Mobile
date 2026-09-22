@@ -23,9 +23,11 @@ class ChromaticTuner : Tuner {
         val centsDifference = 1200f * log2(frequency / note.frequency)
 
         return TunerResult(
-            frequency = frequency,
-            note = note.note,
-            octave = note.octave,
+            noteInfo = NoteInfo(
+                frequency = frequency,
+                note = note.note,
+                octave = note.octave,
+            ),
             centsDifference = centsDifference,
             confidence = confidence
         )

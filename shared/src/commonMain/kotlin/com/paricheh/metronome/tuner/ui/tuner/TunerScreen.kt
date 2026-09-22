@@ -39,7 +39,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -121,7 +123,6 @@ fun TunerScreenContent(
                     x = center.x,
                     y = 82.dp.toPx()
                 )
-
             )
         },
         topBar = {
@@ -211,6 +212,26 @@ fun TunerMainDisplay(
     onSelectNote: (NoteInfo?) -> Unit,
 ) {
     val detectResult = (state as? TunerState.Detected)?.result
+    val centDiff by remember(detectResult?.centsDifference) {
+        derivedStateOf {
+            detectResult?.centsDifference?.coerceIn(
+                minimumValue = -50f,
+                maximumValue = 50f
+            )
+        }
+    }
+
+    val centDiffText by remember(centDiff) {
+        derivedStateOf {
+            centDiff?.let { (it * 10).roundToInt() / 10f }
+        }
+    }
+
+    val frequencyText by remember(detectResult?.frequency) {
+        derivedStateOf {
+            detectResult?.frequency?.let { (it * 10).roundToInt() / 10f }
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -250,9 +271,9 @@ fun TunerMainDisplay(
 
             Spacer(Modifier.weight(1f))
 
-            detectResult?.frequency?.let {
+            frequencyText?.let {
                 Text(
-                    text = "${it.roundToInt()} Hz",
+                    text = "$it Hz",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -269,13 +290,7 @@ fun TunerMainDisplay(
             ),
             title = {
                 Text(
-                    text = detectResult?.centsDifference?.coerceIn(
-                        minimumValue = -50f,
-                        maximumValue = 50f,
-                    )
-                        ?.toInt()
-                        ?.toString()
-                        .orEmpty(),
+                    text = centDiffText?.toString().orEmpty(),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,

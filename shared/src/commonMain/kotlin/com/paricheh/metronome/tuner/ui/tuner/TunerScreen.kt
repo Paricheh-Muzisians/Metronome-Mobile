@@ -366,6 +366,14 @@ fun TunerMainDisplay(
                         onSelectNote = onSelectNote
                     )
                 }
+
+                is Setar -> {
+                    SetarInstrumentSection(
+                        currentInstrument = it,
+                        selectedNote = selectedNote ?: detectResult?.noteInfo,
+                        onSelectNote = onSelectNote
+                    )
+                }
             }
         }
     }

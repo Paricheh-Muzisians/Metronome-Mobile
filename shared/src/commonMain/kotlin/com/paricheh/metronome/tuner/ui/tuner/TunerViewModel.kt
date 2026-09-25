@@ -109,6 +109,7 @@ class TunerViewModel(
                 val instrument = when (key) {
                     Guitar6String.KEY -> Guitar6String()
                     Piano88.KEY -> Piano88()
+                    Setar.KEY -> Setar()
                     else -> error("unknown instrument :$key :(")
                 }
                 _selectedInstrument.emit(instrument)

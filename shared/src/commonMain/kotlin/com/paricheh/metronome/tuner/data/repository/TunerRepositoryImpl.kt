@@ -9,6 +9,7 @@ import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
+import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -45,7 +46,7 @@ class TunerRepositoryImpl(
 
                 if (tunerResult != null) {
                     TunerState.Detected(tunerResult)
-                } else if (pitchResult.confidence > 0.3f) {
+                } else if (pitchResult.confidence > 0.5f) {
                     TunerState.Listening
                 } else {
                     TunerState.NoSignal
@@ -68,8 +69,9 @@ class TunerRepositoryImpl(
 
     override fun getAllInstruments(): List<Instrument> {
         return listOf(
-            Piano88(),
-            Guitar6String()
+            Guitar6String(),
+            Setar(),
+            Piano88()
         )
     }
 }

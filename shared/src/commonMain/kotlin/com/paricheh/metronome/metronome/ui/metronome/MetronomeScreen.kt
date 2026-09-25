@@ -28,8 +28,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.twotone.Settings
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,6 +76,7 @@ import metronome.shared.generated.resources.bpm
 import metronome.shared.generated.resources.cd_settings
 import metronome.shared.generated.resources.continue_text
 import metronome.shared.generated.resources.horizontal_illustration_area
+import metronome.shared.generated.resources.ic_tuner
 import metronome.shared.generated.resources.metroneome_pendulum_axis_layer
 import metronome.shared.generated.resources.metronome_body_layer
 import metronome.shared.generated.resources.metronome_sliding_weight
@@ -292,9 +292,8 @@ fun MetronomeScreen(
                             navController.navigate(TunerScreens.Tuner)
                         }
                     ) {
-                        //TODO Chnage to tuner icon
                         Icon(
-                            imageVector = Icons.Rounded.Tune,
+                            painter = painterResource(Res.drawable.ic_tuner),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             contentDescription = "Tuner"
                         )
@@ -307,7 +306,7 @@ fun MetronomeScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.TwoTone.Settings,
+                            imageVector = Icons.Rounded.Settings,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             contentDescription = stringResource(Res.string.cd_settings)
                         )

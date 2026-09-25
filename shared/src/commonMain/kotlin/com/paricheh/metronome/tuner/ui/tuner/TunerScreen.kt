@@ -51,7 +51,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,10 +61,13 @@ import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.tuner.component.Guitar6StringInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.InstrumentSelectorBottomSheet
+import com.paricheh.metronome.tuner.ui.tuner.component.SetarInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.TunerSlider
+import com.paricheh.metronome.tuner.ui.tuner.component.goodThreshold
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
+import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTitle
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTypeText
 import kotlinx.coroutines.launch
@@ -263,10 +265,24 @@ fun TunerMainDisplay(
 
     val centDiffText by remember(centDiff) {
         derivedStateOf {
-            centDiff?.let { (it * 10).roundToInt() / 10f }
+            detectResult?.centsDifference?.roundToInt()?.toString()
         }
     }
 
+    val hintText: String? by remember(centDiff) {
+        derivedStateOf {
+            val cent = centDiff
+            if (cent == null || cent in -goodThreshold..goodThreshold) {
+                null
+            } else if (cent < 0) {
+                "    سیم را سفت\u200Cتر کنید"
+            } else if (cent > 0) {
+                "    سیم را شل\u200Cتر کنید"
+            } else {
+                null
+            }
+        }
+    }
     val frequencyText by remember(detectResult?.noteInfo?.frequency) {
         derivedStateOf {
             detectResult?.noteInfo
@@ -335,13 +351,15 @@ fun TunerMainDisplay(
             ),
             title = {
                 Text(
-                    text = centDiffText?.toString().orEmpty(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
+                    text = hintText.orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             },
-            onTuned = {}
+            centDifferenceText = centDiffText.orEmpty(),
+            onTuned = {
+
+            }
         )
 
         Spacer(modifier = Modifier.weight(1f))

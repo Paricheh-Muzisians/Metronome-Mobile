@@ -26,7 +26,6 @@ import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.standard_guitar_headstock
 import org.jetbrains.compose.resources.painterResource
 
-
 @Composable
 fun Guitar6StringInstrumentSection(
     currentInstrument: Guitar6String,
@@ -65,15 +64,17 @@ fun Guitar6StringInstrumentSection(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            currentInstrument.notes.take(3).forEach {
-                NoteButtons(
-                    name = it.note.displayName,
-                    isSelected = selectedNote == it,
-                    onClick = {
-                        onSelectNote(it)
-                    }
-                )
-            }
+            currentInstrument.notes
+                .take(3)
+                .reversed().forEach {
+                    NoteButtons(
+                        name = it.note.displayName,
+                        isSelected = selectedNote == it,
+                        onClick = {
+                            onSelectNote(it)
+                        }
+                    )
+                }
         }
     }
 }

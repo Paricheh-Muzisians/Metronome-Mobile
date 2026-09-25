@@ -9,6 +9,7 @@ import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
+import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow

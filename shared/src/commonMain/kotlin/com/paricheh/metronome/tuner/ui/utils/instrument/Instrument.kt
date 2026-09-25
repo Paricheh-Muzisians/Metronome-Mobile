@@ -5,6 +5,7 @@ import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.eighteen_eight_key_piano
 import metronome.shared.generated.resources.guitar
 import metronome.shared.generated.resources.piano
+import metronome.shared.generated.resources.setar
 import metronome.shared.generated.resources.standard
 
 sealed interface Instrument {
@@ -20,6 +21,10 @@ fun Instrument.getTitle() = when (this) {
     is Piano88 -> {
         Res.string.piano
     }
+
+    is Setar -> {
+        Res.string.setar
+    }
 }
 
 fun Instrument.getTypeText() = when (this) {
@@ -29,5 +34,9 @@ fun Instrument.getTypeText() = when (this) {
 
     is Piano88 -> {
         Res.string.eighteen_eight_key_piano
+    }
+
+    is Setar -> {
+        Res.string.standard
     }
 }

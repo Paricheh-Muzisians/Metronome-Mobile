@@ -11,7 +11,7 @@ class SimpleFrequencyNormalizer(
     private var lastFrequency: Float = 0f
 
     override fun normalize(frequency: Float, confidence: Float): Float {
-        if (frequency <= 0f || confidence < 0.5f) {
+        if (frequency <= 0f || confidence < 0.7f) {
             lastFrequency = 0f
             return 0f
         }

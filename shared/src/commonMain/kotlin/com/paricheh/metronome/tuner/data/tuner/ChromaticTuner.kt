@@ -13,7 +13,7 @@ class ChromaticTuner : Tuner {
         targetNote: NoteInfo?,
         notes: List<NoteInfo>,
     ): TunerResult? {
-        if (frequency <= 0f || confidence < 0.7) return null
+        if (frequency <= 0f) return null
 
         val note = targetNote
             ?: notes.minByOrNull { abs(it.frequency - frequency) }
@@ -21,6 +21,10 @@ class ChromaticTuner : Tuner {
 
         // Calculate cents difference: cents = 1200 * log2(f1 / f2)
         val centsDifference = 1200f * log2(frequency / note.frequency)
+
+        if (centsDifference < -150 || centsDifference > 150) {
+            return null
+        }
 
         return TunerResult(
             noteInfo = NoteInfo(

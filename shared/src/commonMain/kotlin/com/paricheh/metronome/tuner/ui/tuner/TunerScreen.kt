@@ -67,7 +67,7 @@ import com.paricheh.metronome.tuner.ui.tuner.component.goodThreshold
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
-import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTitle
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTypeText
 import kotlinx.coroutines.launch
@@ -385,7 +385,7 @@ fun TunerMainDisplay(
                     )
                 }
 
-                is Setar -> {
+                else -> {
                     SetarInstrumentSection(
                         currentInstrument = it,
                         selectedNote = selectedNote ?: detectResult?.noteInfo,

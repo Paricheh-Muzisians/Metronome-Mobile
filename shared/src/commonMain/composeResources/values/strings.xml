@@ -146,6 +146,10 @@
     <string name="guitar">گیتار</string>
     <string name="piano">پیانو</string>
     <string name="standard">استاندارد</string>
+    <string name="mahoor">ماهور</string>
+    <string name="shur_do">شور دو</string>
+    <string name="shur_re">شور ر</string>
+    <string name="shur_sol">شور سل</string>
     <string name="eighteen_eight_key_piano">۸۸ کلید</string>
     <string name="setar">سه‌تار</string>
 </resources>

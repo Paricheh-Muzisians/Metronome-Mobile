@@ -21,14 +21,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.paricheh.metronome.tuner.model.NoteInfo
-import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
+import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.setar_headstock
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun SetarInstrumentSection(
-    currentInstrument: Setar,
+    currentInstrument: Instrument,
     selectedNote: NoteInfo?,
     onSelectNote: (NoteInfo?) -> Unit,
 ) {
@@ -43,15 +44,17 @@ fun SetarInstrumentSection(
             verticalArrangement = Arrangement.spacedBy(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            currentInstrument.notes.takeLast(2).forEach {
-                NoteButtons(
-                    name = it.note.displayName,
-                    isSelected = selectedNote == it,
-                    onClick = {
-                        onSelectNote(it)
-                    }
-                )
-            }
+            currentInstrument.notes.take(2)
+                .reversed()
+                .forEach {
+                    NoteButtons(
+                        name = it.note.displayName,
+                        isSelected = selectedNote == it,
+                        onClick = {
+                            onSelectNote(it)
+                        }
+                    )
+                }
         }
 
         Image(
@@ -65,15 +68,17 @@ fun SetarInstrumentSection(
             verticalArrangement = Arrangement.spacedBy(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            currentInstrument.notes.take(2).forEach {
-                NoteButtons(
-                    name = it.note.displayName,
-                    isSelected = selectedNote == it,
-                    onClick = {
-                        onSelectNote(it)
-                    }
-                )
-            }
+            currentInstrument.notes
+                .takeLast(2)
+                .forEach {
+                    NoteButtons(
+                        name = it.note.displayName,
+                        isSelected = selectedNote == it,
+                        onClick = {
+                            onSelectNote(it)
+                        }
+                    )
+                }
         }
     }
 }

@@ -9,13 +9,17 @@ import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
-import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurDo
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurRe
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurSol
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -107,13 +111,13 @@ class TunerViewModel(
     private fun observeInstrument() {
         preferences.selectedInstrumentKey
             .onEach { key ->
-                val instrument = when (key) {
-                    Guitar6String.KEY -> Guitar6String()
-                    Piano88.KEY -> Piano88()
-                    Setar.KEY -> Setar()
-                    else -> error("unknown instrument :$key :(")
+                val instrument = allInstruments.value
+                    .firstOrNull {
+                        it.key == key
+                    }
+                instrument?.let {
+                    _selectedInstrument.emit(it)
                 }
-                _selectedInstrument.emit(instrument)
             }
             .catch {
                 //TODO Log

@@ -4,8 +4,12 @@ import com.paricheh.metronome.tuner.model.NoteInfo
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.eighteen_eight_key_piano
 import metronome.shared.generated.resources.guitar
+import metronome.shared.generated.resources.mahoor
 import metronome.shared.generated.resources.piano
 import metronome.shared.generated.resources.setar
+import metronome.shared.generated.resources.shur_do
+import metronome.shared.generated.resources.shur_re
+import metronome.shared.generated.resources.shur_sol
 import metronome.shared.generated.resources.standard
 
 sealed interface Instrument {
@@ -22,7 +26,19 @@ fun Instrument.getTitle() = when (this) {
         Res.string.piano
     }
 
-    is Setar -> {
+    is SetarMahoor -> {
+        Res.string.setar
+    }
+
+    is SetarShurDo -> {
+        Res.string.setar
+    }
+
+    is SetarShurRe -> {
+        Res.string.setar
+    }
+
+    is SetarShurSol -> {
         Res.string.setar
     }
 }
@@ -36,7 +52,19 @@ fun Instrument.getTypeText() = when (this) {
         Res.string.eighteen_eight_key_piano
     }
 
-    is Setar -> {
-        Res.string.standard
+    is SetarMahoor -> {
+        Res.string.mahoor
+    }
+
+    is SetarShurDo -> {
+        Res.string.shur_do
+    }
+
+    is SetarShurRe -> {
+        Res.string.shur_re
+    }
+
+    is SetarShurSol -> {
+        Res.string.shur_sol
     }
 }

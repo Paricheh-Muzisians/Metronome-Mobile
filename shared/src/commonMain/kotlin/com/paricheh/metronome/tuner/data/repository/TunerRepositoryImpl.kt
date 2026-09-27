@@ -9,7 +9,10 @@ import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
-import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurDo
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurRe
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurSol
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -70,7 +73,10 @@ class TunerRepositoryImpl(
     override fun getAllInstruments(): List<Instrument> {
         return listOf(
             Guitar6String(),
-            Setar(),
+            SetarMahoor(),
+            SetarShurSol(),
+            SetarShurDo(),
+            SetarShurRe(),
             Piano88()
         )
     }

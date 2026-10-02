@@ -6,7 +6,7 @@ package com.paricheh.metronome.tuner.data.normalizer
  * For Phase 1, we use an Exponential Moving Average (EMA) to reduce jitter.
  */
 class SimpleFrequencyNormalizer(
-    private val alpha: Float = 0.3f // Smoothing factor
+    private val alpha: Float = 0.3f, // Smoothing factor
 ) : FrequencyNormalizer {
     private var lastFrequency: Float = 0f
 

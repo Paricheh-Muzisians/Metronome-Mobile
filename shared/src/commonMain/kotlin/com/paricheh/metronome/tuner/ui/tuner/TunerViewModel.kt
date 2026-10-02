@@ -2,24 +2,19 @@ package com.paricheh.metronome.tuner.ui.tuner
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paricheh.metronome.core.soundplayer.TunerSoundPlayer
 import com.paricheh.metronome.tuner.data.preferences.TunerPreferences
 import com.paricheh.metronome.tuner.data.repository.TunerRepository
-import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
-import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurDo
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurRe
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurSol
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -27,6 +22,7 @@ import kotlinx.coroutines.launch
 class TunerViewModel(
     private val tunerRepository: TunerRepository,
     private val preferences: TunerPreferences,
+    private val tunerSoundPlayer: TunerSoundPlayer,
 ) : ViewModel() {
     var observeTunerJob: Job? = null
 
@@ -41,7 +37,6 @@ class TunerViewModel(
 
     private val _allInstruments = MutableStateFlow<List<Instrument>>(listOf())
     val allInstruments = _allInstruments.asStateFlow()
-
 
     init {
         observeInstrument()
@@ -58,6 +53,9 @@ class TunerViewModel(
 
     fun selectNote(note: NoteInfo?) {
         viewModelScope.launch {
+            if (selectedInstrument.value is Guitar6String && note != null) {
+                tunerSoundPlayer.playGuitarSample(note)
+            }
             _selectedNote.emit(note)
         }
     }

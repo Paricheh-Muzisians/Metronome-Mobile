@@ -35,24 +35,26 @@ class TunerRepositoryImpl(
         return audioEngine.observeAudioFrames()
             .map { frame ->
                 val pitchResult = pitchDetector.detect(frame)
-                val normalizedFreq =
-                    normalizer.normalize(
-                        frequency = pitchResult.frequency,
-                        confidence = pitchResult.confidence
-                    )
-                val tunerResult = tuner.process(
-                    frequency = normalizedFreq,
-                    confidence = pitchResult.confidence,
-                    targetNote = targetNote,
-                    notes = notes,
+                val normalizedFreq = normalizer.normalize(
+                    frequency = pitchResult.frequency,
+                    confidence = pitchResult.confidence
                 )
 
-                if (tunerResult != null) {
-                    TunerState.Detected(tunerResult)
-                } else if (pitchResult.confidence > 0.5f) {
-                    TunerState.Listening
-                } else {
+                if (normalizedFreq <= 0f) {
                     TunerState.NoSignal
+                } else {
+                    val tunerResult = tuner.process(
+                        frequency = normalizedFreq,
+                        confidence = pitchResult.confidence,
+                        targetNote = targetNote,
+                        notes = notes,
+                    )
+
+                    if (tunerResult != null) {
+                        TunerState.Detected(tunerResult)
+                    } else {
+                        TunerState.Listening
+                    }
                 }
             }
             .onStart { emit(TunerState.Idle) }

@@ -2,6 +2,7 @@ package com.paricheh.metronome.core.platform
 
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import android.widget.Toast
 import androidx.core.net.toUri
 import com.paricheh.metronome.core.Store
@@ -19,6 +20,20 @@ class AndroidPlatformActionHandler(private val context: Context) : PlatformActio
         Toast(context).apply {
             setText(text)
             this.show()
+        }
+    }
+
+    override fun openAppSettings() {
+        try {
+            val intent = Intent(
+                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                "package:${context.packageName}".toUri()
+            ).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+
         }
     }
 

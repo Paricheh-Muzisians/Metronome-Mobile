@@ -122,6 +122,9 @@
     <string name="tuner_label_frequency">فرکانس</string>
     <string name="tuner_unit_hz">هرتز</string>
     <string name="tuner_label_cents">دقت</string>
+    <string name="microphone_permission_title">دسترسی به میکروفون</string>
+    <string name="microphone_permission_description">برای استفاده از کوک و تشخیص فرکانس، برنامه نیاز به دسترسی به میکروفون دارد.</string>
+    <string name="open_settings">تنظیمات</string>
 
     <string name="note_do">دو</string>
     <string name="note_do_sharp">دو دیز</string>

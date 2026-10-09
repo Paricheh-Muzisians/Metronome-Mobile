@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -53,23 +54,27 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.composeunstyled.SheetDetent
 import com.composeunstyled.rememberModalBottomSheetState
+import com.paricheh.metronome.core.platform.LocalPlatformActionHandler
 import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.tuner.component.Guitar6StringInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.InstrumentSelectorBottomSheet
+import com.paricheh.metronome.tuner.ui.tuner.component.PermissionDialog
 import com.paricheh.metronome.tuner.ui.tuner.component.SetarInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.TunerSlider
 import com.paricheh.metronome.tuner.ui.tuner.component.goodThreshold
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTitle
 import com.paricheh.metronome.tuner.ui.utils.instrument.getTypeText
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.cd_back
@@ -82,13 +87,54 @@ import kotlin.math.roundToInt
 @Composable
 fun TunerScreen(
     navController: NavController,
+    onHasBackgroundBlurChanged: (Boolean) -> Unit,
     viewModel: TunerViewModel = koinViewModel(),
 ) {
     val scope = rememberCoroutineScope()
+    val platformActionHandler = LocalPlatformActionHandler.current
+
     val tunerState by viewModel.tunerState.collectAsStateWithLifecycle()
     val selectedNote by viewModel.selectedNote.collectAsStateWithLifecycle()
     val selectedInstrument by viewModel.selectedInstrument.collectAsStateWithLifecycle()
     val allInstruments by viewModel.allInstruments.collectAsStateWithLifecycle()
+    val showPermissionDialog by viewModel.showPermissionDialog.collectAsStateWithLifecycle()
+    val permissionState = rememberAudioPermissionState(
+        onPermissionResult = { isGranted ->
+            if (isGranted) {
+                viewModel.showPermissionDialog.value = false
+                viewModel.startTuner()
+            } else {
+                viewModel.showPermissionDialog.value = true
+            }
+        }
+    )
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.checkPermission()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.shouldRequestPermission.collectLatest {
+            permissionState.requestPermission()
+        }
+    }
+
+    LaunchedEffect(showPermissionDialog) {
+        onHasBackgroundBlurChanged(showPermissionDialog)
+    }
+
+    if (showPermissionDialog) {
+        PermissionDialog(
+            onOpenSettings = {
+                platformActionHandler.openAppSettings()
+                onHasBackgroundBlurChanged(false)
+            },
+            onBack = {
+                navController.popBackStack()
+                onHasBackgroundBlurChanged(false)
+            }
+        )
+    }
 
     val instrumentSelectorSheetState = rememberModalBottomSheetState(
         initialDetent = SheetDetent.Hidden

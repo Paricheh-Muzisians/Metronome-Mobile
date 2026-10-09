@@ -10,6 +10,7 @@ import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,12 +18,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class TunerViewModel(
     private val tunerRepository: TunerRepository,
     private val preferences: TunerPreferences,
     private val tunerSoundPlayer: TunerSoundPlayer,
+    private val permissionChecker: PermissionChecker,
 ) : ViewModel() {
     var observeTunerJob: Job? = null
 
@@ -38,17 +41,44 @@ class TunerViewModel(
     private val _allInstruments = MutableStateFlow<List<Instrument>>(listOf())
     val allInstruments = _allInstruments.asStateFlow()
 
+    val showPermissionDialog = MutableStateFlow(false)
+
+    private val _shouldRequestPermission = Channel<Boolean>(Channel.BUFFERED)
+    val shouldRequestPermission = _shouldRequestPermission.receiveAsFlow()
+
     init {
         observeInstrument()
         getAllInstruments()
         handleInstrumentChange()
-        startTuner()
+    }
+
+    fun checkPermission() {
+        if (permissionChecker.isAudioPermissionGranted()) {
+            showPermissionDialog.value = false
+            startTuner()
+        } else {
+            stopTuner()
+            if (!showPermissionDialog.value) {
+                _shouldRequestPermission.trySend(true)
+            }
+        }
     }
 
     fun startTuner() {
         viewModelScope.launch {
             tunerRepository.startTuner()
         }
+    }
+
+    fun stopTuner() {
+        viewModelScope.launch {
+            tunerRepository.stopTuner()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopTuner()
     }
 
     fun selectNote(note: NoteInfo?) {

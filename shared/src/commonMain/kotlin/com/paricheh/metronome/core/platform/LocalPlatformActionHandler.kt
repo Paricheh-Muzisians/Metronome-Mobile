@@ -6,5 +6,6 @@ val LocalPlatformActionHandler = staticCompositionLocalOf<PlatformActionHandler>
     object : PlatformActionHandler {
         override fun openRatingPage() {}
         override fun showToast(text: String) {}
+        override fun openAppSettings() {}
     }
 }

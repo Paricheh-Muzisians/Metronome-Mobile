@@ -61,7 +61,7 @@ private const val warningThreshold = 20f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TunerSlider(
+internal fun TunerSlider(
     centDifference: Float?,
     centDifferenceText: String,
     title: @Composable () -> Unit,
@@ -156,16 +156,16 @@ fun TunerSlider(
                 enabled = false,
                 valueRange = minRange..maxRange,
                 thumb = {
-                    AnimatedContent(isTuned) {
-                        Box(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .clip(CircleShape)
-                                .size(48.dp)
-                                .aspectRatio(1f)
-                                .background(indicatorColor),
-                            contentAlignment = Alignment.Center
-                        ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .clip(CircleShape)
+                            .size(48.dp)
+                            .aspectRatio(1f)
+                            .background(indicatorColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AnimatedContent(isTuned) {
                             if (it) {
                                 Icon(
                                     modifier = Modifier

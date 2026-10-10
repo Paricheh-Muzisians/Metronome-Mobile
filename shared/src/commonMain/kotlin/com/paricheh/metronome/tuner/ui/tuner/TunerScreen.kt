@@ -67,6 +67,7 @@ import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.tuner.component.Guitar6StringInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.InstrumentSelectorBottomSheet
 import com.paricheh.metronome.tuner.ui.tuner.component.PermissionDialog
+import com.paricheh.metronome.tuner.ui.tuner.component.PianoInstrument
 import com.paricheh.metronome.tuner.ui.tuner.component.SetarInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.TunerSlider
 import com.paricheh.metronome.tuner.ui.tuner.component.goodThreshold
@@ -250,7 +251,12 @@ fun TunerScreenContent(
                             }
                         }
                     ) {
-                        AnimatedContent(selectedNote == null) {
+                        AnimatedContent(
+                            targetState = selectedNote == null,
+                            transitionSpec = {
+                                fadeIn() togetherWith fadeOut()
+                            }
+                            ) {
                             if (it) {
                                 Icon(
                                     imageVector = Icons.Rounded.Sensors,
@@ -441,139 +447,6 @@ fun TunerMainDisplay(
                         onSelectNote = onSelectNote
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PianoInstrument(
-    currentInstrument: Instrument,
-    selectedNote: NoteInfo?,
-    onSelectNote: (NoteInfo?) -> Unit,
-) {
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val lazyState = rememberLazyListState()
-
-    val selectedIndex = remember(selectedNote, currentInstrument.notes) {
-        if (selectedNote == null) -1
-        else currentInstrument.notes.indexOfFirst { it.isSameNote(selectedNote) }
-    }
-
-    LaunchedEffect(selectedIndex) {
-        if (selectedIndex >= 0) {
-            lazyState.animateScrollToItem(selectedIndex)
-        }
-    }
-
-    LazyColumn(
-        state = lazyState,
-        modifier = Modifier
-            .drawWithContent {
-                drawContent()
-                drawRect(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            Color.Transparent,
-                            Color.Transparent,
-                            Color.Transparent,
-                            Color.Transparent,
-                            surfaceColor,
-                        )
-                    ),
-                    size = Size(
-                        height = size.height,
-                        width = size.width
-                    ),
-                )
-            }
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        stickyHeader {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            listOf(
-                                surfaceColor,
-                                surfaceColor,
-                                Color.Transparent,
-                            )
-                        ),
-                    )
-                    .padding(vertical = 24.dp)
-            ) {
-                HorizontalDivider()
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "انتخاب کلاویه",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Start
-                )
-            }
-        }
-
-        itemsIndexed(currentInstrument.notes) { index, note ->
-            val isSelectedTransition = updateTransition(note.isSameNote(selectedNote))
-            val backgroundColor by isSelectedTransition.animateColor {
-                if (it) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.secondaryContainer
-                }
-            }
-
-            val textColor by isSelectedTransition.animateColor {
-                if (it) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSecondaryContainer
-                }
-            }
-
-            val verticalPadding by isSelectedTransition.animateDp {
-                if (it) {
-                    20.dp
-                } else {
-                    16.dp
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .clip(MaterialTheme.shapes.large)
-                    .background(backgroundColor)
-                    .clickable {
-                        onSelectNote(note)
-                    }
-                    .padding(vertical = verticalPadding)
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Text(
-                    text = (index + 1).toString(),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = textColor
-                )
-
-                Text(
-                    text = note.note.displayName,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = textColor
-                )
-
-                Text(
-                    text = "${note.frequency.roundToInt()} Hz",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }

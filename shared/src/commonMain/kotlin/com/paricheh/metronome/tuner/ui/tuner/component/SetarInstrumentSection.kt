@@ -28,7 +28,7 @@ import metronome.shared.generated.resources.setar_headstock
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun SetarInstrumentSection(
+internal fun SetarInstrumentSection(
     currentInstrument: Instrument,
     selectedNote: NoteInfo?,
     onSelectNote: (NoteInfo?) -> Unit,

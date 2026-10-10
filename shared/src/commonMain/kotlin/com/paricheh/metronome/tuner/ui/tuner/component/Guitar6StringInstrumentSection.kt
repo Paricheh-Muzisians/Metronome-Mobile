@@ -28,7 +28,7 @@ import metronome.shared.generated.resources.standard_guitar_headstock
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun Guitar6StringInstrumentSection(
+internal fun Guitar6StringInstrumentSection(
     currentInstrument: Guitar6String,
     selectedNote: NoteInfo?,
     onSelectNote: (NoteInfo?) -> Unit,

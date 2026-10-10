@@ -1,14 +1,10 @@
 package com.paricheh.metronome.tuner.ui.tuner
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,19 +14,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
 import androidx.compose.material.icons.automirrored.twotone.ArrowBack
 import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.SensorsOff
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,10 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -62,7 +53,6 @@ import com.composeunstyled.SheetDetent
 import com.composeunstyled.rememberModalBottomSheetState
 import com.paricheh.metronome.core.platform.LocalPlatformActionHandler
 import com.paricheh.metronome.tuner.model.NoteInfo
-import com.paricheh.metronome.tuner.model.isSameNote
 import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.tuner.component.Guitar6StringInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.InstrumentSelectorBottomSheet
@@ -216,18 +206,29 @@ fun TunerScreenContent(
                     containerColor = Color.Black
                 ),
                 title = {
-                    Text(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                            .padding(
-                                horizontal = 12.dp,
-                                vertical = 4.dp
-                            ),
-                        text = stringResource(Res.string.tuner_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    BadgedBox(
+                        badge = {
+                            Text(
+                                text = "آزمایشی",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+
+                        }
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                .padding(
+                                    horizontal = 12.dp,
+                                    vertical = 4.dp
+                                ),
+                            text = stringResource(Res.string.tuner_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -256,7 +257,7 @@ fun TunerScreenContent(
                             transitionSpec = {
                                 fadeIn() togetherWith fadeOut()
                             }
-                            ) {
+                        ) {
                             if (it) {
                                 Icon(
                                     imageVector = Icons.Rounded.Sensors,

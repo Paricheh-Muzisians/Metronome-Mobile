@@ -25,7 +25,8 @@ internal class IosMetronomeSettings : MetronomeSettings {
             },
             selectedBarStructure = (userDefaults.objectForKey("bar_structure") as? String?)?.let {
                 Json.decodeFromString<List<Note>>(it)
-            }
+            },
+            hasSeenUnboarding = userDefaults.boolForKey("has_seen_unboarding")
         )
     }
 
@@ -56,6 +57,11 @@ internal class IosMetronomeSettings : MetronomeSettings {
 
     override suspend fun updateVibrationEnabled(enabled: Boolean) {
         userDefaults.setBool(enabled, "vibration_enabled")
+        saveAndUpdate()
+    }
+
+    override suspend fun updateHasSeenUnboarding(hasSeen: Boolean) {
+        userDefaults.setBool(hasSeen, "has_seen_unboarding")
         saveAndUpdate()
     }
 }

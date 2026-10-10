@@ -114,10 +114,61 @@
 
     <!-- BPM -->
     <string name="bpm">بی‌پی‌ام</string>
+    <!-- Tuner -->
+    <string name="metronome_title">مترونوم</string>
+    <string name="tuner_title">کوک</string>
+    <string name="tuner_badge_beta">آزمایشی</string>
+    <string name="tuner_tighten_string">سیم را سفت‌تر کنید</string>
+    <string name="tuner_loosen_string">سیم را شل‌تر کنید</string>
+    <string name="tuning_count_format">%1$d کوک</string>
+    <string name="select_piano_key">انتخاب کلاویه</string>
+    <string name="tuner_status_idle">آماده برای شروع</string>
+    <string name="tuner_status_listening">در حال شنیدن...</string>
+    <string name="tuner_status_no_signal">سیگنالی یافت نشد</string>
+    <string name="tuner_label_frequency">فرکانس</string>
+    <string name="tuner_unit_hz">هرتز</string>
+    <string name="tuner_label_cents">دقت</string>
+    <string name="microphone_permission_title">دسترسی به میکروفون</string>
+    <string name="microphone_permission_description">برای استفاده از کوک و تشخیص فرکانس، برنامه نیاز به دسترسی به میکروفون دارد.</string>
+    <string name="open_settings">تنظیمات</string>
+
+    <string name="note_do">دو</string>
+    <string name="note_do_sharp">دو دیز</string>
+    <string name="note_re">ر</string>
+    <string name="note_re_sharp">ر دیز</string>
+    <string name="note_mi">می</string>
+    <string name="note_fa">فا</string>
+    <string name="note_fa_sharp">فا دیز</string>
+    <string name="note_sol">سل</string>
+    <string name="note_sol_sharp">سل دیز</string>
+    <string name="note_la">لا</string>
+    <string name="note_la_sharp">لا دیز</string>
+    <string name="note_si">سی</string>
 
     <!-- Rating -->
     <string name="rating_dialog_title">یه امتیازمون نشه؟!</string>
     <string name="rating_dialog_description">فعلا فقط مترونوم ولی کار با هم زیاد داریم.</string>
     <string name="rating_dialog_submit">ثبت نظر</string>
     <string name="rating_dialog_not_now">فعلاً نه</string>
+
+
+    <string name="guitar">گیتار</string>
+    <string name="piano">پیانو</string>
+    <string name="standard">استاندارد</string>
+    <string name="eighteen_eight_key_piano">۸۸ کلید</string>
+    <string name="setar">سه‌تار</string>
+
+    <string name="choose_instrument">انتخاب ساز</string>
+    <string name="setar_tunings">کوک‌های سه‌تار</string>
+
+    <string name="setar_mahoor">ماهور</string>
+    <string name="setar_shur">شور</string>
+    <string name="setar_homayoun">همایون</string>
+    <string name="setar_chahargah">چهارگاه</string>
+    <string name="setar_rastpanjgah">راست‌پنجگاه</string>
+    <string name="setar_nava">نوا</string>
+    <string name="setar_esfahan">بیات اصفهان</string>
+    <string name="setar_abuata">ابوعطا</string>
+    <string name="setar_dashti">دشتی</string>
+    <string name="setar_bayattork">بیات ترک</string>
 </resources>

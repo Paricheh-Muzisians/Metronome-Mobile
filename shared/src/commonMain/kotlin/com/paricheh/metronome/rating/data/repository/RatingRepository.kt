@@ -7,4 +7,5 @@ interface RatingRepository {
     suspend fun markAsPrompt()
     suspend fun markAsRated()
     suspend fun increaseRatingPoint()
+    suspend fun increaseRatingPoint(point: Int)
 }

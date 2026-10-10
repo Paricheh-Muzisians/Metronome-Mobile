@@ -43,4 +43,10 @@ class RatingRepositoryImpl(
             .first()
         ratingPreferences.setRatePoint(currentRate + 1)
     }
+
+    override suspend fun increaseRatingPoint(point: Int) {
+        val currentRate = ratingPreferences.ratePoint
+            .first()
+        ratingPreferences.setRatePoint(currentRate + point)
+    }
 }

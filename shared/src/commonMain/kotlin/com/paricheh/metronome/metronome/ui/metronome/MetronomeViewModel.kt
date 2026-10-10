@@ -8,6 +8,8 @@ import com.paricheh.metronome.core.soundplayer.MetronomeSoundPlayer
 import com.paricheh.metronome.core.vibrator.MetronomeVibrator
 import com.paricheh.metronome.metronome.data.MetronomeSettings
 import com.paricheh.metronome.rating.data.repository.RatingRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -100,7 +102,7 @@ class MetronomeViewModel(
     }
 
     fun stopMetronome() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if (isMetronomeStarted.value) {
                 ratingRepository.increaseRatingPoint()
             }

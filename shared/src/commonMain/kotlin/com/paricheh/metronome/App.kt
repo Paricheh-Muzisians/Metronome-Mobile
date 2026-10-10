@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -25,23 +27,32 @@ import com.paricheh.metronome.metronome.ui.metronome.MetronomeScreen
 import com.paricheh.metronome.metronome.ui.setting.SettingsScreen
 import com.paricheh.metronome.navigation.MetronomeScreens.Metronome
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
+import com.paricheh.metronome.navigation.TunerScreens
 import com.paricheh.metronome.rating.ui.Rating
+import com.paricheh.metronome.tuner.ui.tuner.TunerScreen
 
 @Composable
 fun App() {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         MetronomeTheme {
             val navController = rememberNavController()
-            var blurEffectRatio by rememberSaveable { mutableStateOf(0f) }
+            var hasScreenBlur by rememberSaveable {
+                mutableStateOf(false)
+            }
+            val blurEffectRatio by remember(hasScreenBlur) {
+                derivedStateOf {
+                    if (hasScreenBlur) {
+                        20f
+                    } else {
+                        0f
+                    }
+                }
+            }
             val animatedBlurEffect by animateFloatAsState(blurEffectRatio)
 
             Rating(
                 onRatingVisibilityChange = {
-                    blurEffectRatio = if (it) {
-                        6f
-                    } else {
-                        0f
-                    }
+                    hasScreenBlur = it
                 }
             )
 
@@ -49,7 +60,13 @@ fun App() {
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
                     .fillMaxSize()
-                    .blur(animatedBlurEffect.dp),
+                    .then(
+                        if (animatedBlurEffect > 0f) {
+                            Modifier.blur(animatedBlurEffect.dp)
+                        } else {
+                            Modifier
+                        }
+                    ),
                 navController = navController,
                 startDestination = Metronome
             ) {
@@ -64,6 +81,18 @@ fun App() {
                     exitTransition = { fadeOut() }
                 ) {
                     SettingsScreen(navController)
+                }
+
+                composable<TunerScreens.Tuner>(
+                    enterTransition = { fadeIn() },
+                    exitTransition = { fadeOut() }
+                ) {
+                    TunerScreen(
+                        navController = navController,
+                        onHasBackgroundBlurChanged = {
+                            hasScreenBlur = it
+                        },
+                    )
                 }
             }
         }

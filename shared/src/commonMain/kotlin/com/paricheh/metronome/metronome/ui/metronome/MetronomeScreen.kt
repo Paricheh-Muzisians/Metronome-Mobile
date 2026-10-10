@@ -16,24 +16,27 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Settings
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -45,6 +48,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -65,11 +70,14 @@ import com.paricheh.metronome.core.titleEnglish
 import com.paricheh.metronome.core.titlePersian
 import com.paricheh.metronome.designsystem.NonCommonTypography
 import com.paricheh.metronome.navigation.MetronomeScreens.Setting
+import com.paricheh.metronome.navigation.TunerScreens
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.bpm
 import metronome.shared.generated.resources.cd_settings
 import metronome.shared.generated.resources.continue_text
 import metronome.shared.generated.resources.horizontal_illustration_area
+import metronome.shared.generated.resources.ic_tuner
+import metronome.shared.generated.resources.metronome_title
 import metronome.shared.generated.resources.metroneome_pendulum_axis_layer
 import metronome.shared.generated.resources.metronome_body_layer
 import metronome.shared.generated.resources.metronome_sliding_weight
@@ -235,14 +243,63 @@ fun MetronomeScreen(
         }
     }
 
+    val primaryColor = MaterialTheme.colorScheme.primary
     Scaffold(
+        modifier = Modifier.drawWithContent {
+            drawContent()
+            drawCircle(
+                brush = Brush.radialGradient(
+                    listOf(
+                        primaryColor.copy(alpha = 0.1f),
+                        Color.Transparent,
+                    ),
+                    radius = 120.dp.toPx(),
+                    center = Offset(
+                        x = center.x,
+                        y = 82.dp.toPx()
+                    )
+                ),
+                radius = 120.dp.toPx(),
+                center = Offset(
+                    x = center.x,
+                    y = 82.dp.toPx()
+                )
+
+            )
+        },
         containerColor = Color.Black,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Black
                 ),
-                title = {},
+                title = {
+                    Text(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(
+                                horizontal = 12.dp,
+                                vertical = 4.dp
+                            ),
+                        text = stringResource(Res.string.metronome_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(TunerScreens.Tuner)
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_tuner),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            contentDescription = "Tuner"
+                        )
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {
@@ -250,7 +307,7 @@ fun MetronomeScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.TwoTone.Settings,
+                            imageVector = Icons.Rounded.Settings,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             contentDescription = stringResource(Res.string.cd_settings)
                         )
@@ -308,24 +365,26 @@ fun MetronomeScreen(
                     fadeIn() togetherWith fadeOut()
                 }
             ) {
-                Column(
-                    modifier = Modifier.padding(top = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     val musicianTempoText = buildAnnotatedString {
                         append(stringResource(currentTempoMarkings.titleEnglish()))
                     }
+                    Text(
+                        text = stringResource(currentTempoMarkings.titlePersian()),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = NonCommonTypography.PersianSonatiHeader
+                    )
 
                     Text(
                         text = musicianTempoText,
                         color = MaterialTheme.colorScheme.onSurface,
                         style = NonCommonTypography.EnglishSontatiHeader,
-                    )
-
-                    Text(
-                        text = stringResource(currentTempoMarkings.titlePersian()),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = NonCommonTypography.PersianSonatiHeader
                     )
                 }
             }

@@ -88,6 +88,11 @@ private fun Rating(
     val platformActionHandler = LocalPlatformActionHandler.current
 
     LaunchedEffect(shouldShowRating) {
+        if (shouldShowRating) {
+            analyticsManager.track(
+                "show_rating_dialog"
+            )
+        }
         isRatingVisible = shouldShowRating
     }
 
@@ -97,7 +102,12 @@ private fun Rating(
 
     if (isRatingVisible) {
         RatingDialog(
-            onMarkAsPrompt = viewModel::markAsPrompt,
+            onMarkAsPrompt = {
+                viewModel.markAsPrompt()
+                analyticsManager.track(
+                    "rating_mark_as_prompt"
+                )
+            },
             onRated = { rate ->
                 analyticsManager.track(
                     event = "user-rate",
@@ -116,6 +126,9 @@ private fun Rating(
             },
             onDismiss = {
                 isRatingVisible = false
+                analyticsManager.track(
+                    "rating_dismiss"
+                )
             }
         )
     }

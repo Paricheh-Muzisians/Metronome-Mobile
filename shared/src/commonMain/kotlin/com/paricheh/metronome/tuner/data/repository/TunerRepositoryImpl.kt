@@ -9,10 +9,16 @@ import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarAbuata
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarBayatTork
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarChahargah
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarDashti
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarEsfahan
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarHomayoun
 import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurDo
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurRe
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShurSol
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarNava
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarRastPanjgah
+import com.paricheh.metronome.tuner.ui.utils.instrument.SetarShur
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -75,11 +81,17 @@ class TunerRepositoryImpl(
     override fun getAllInstruments(): List<Instrument> {
         return listOf(
             Guitar6String(),
+            Piano88(),
             SetarMahoor(),
-            SetarShurSol(),
-            SetarShurDo(),
-            SetarShurRe(),
-            Piano88()
+            SetarShur(),
+            SetarHomayoun(),
+            SetarChahargah(),
+            SetarRastPanjgah(),
+            SetarNava(),
+            SetarEsfahan(),
+            SetarAbuata(),
+            SetarDashti(),
+            SetarBayatTork(),
         )
     }
 }

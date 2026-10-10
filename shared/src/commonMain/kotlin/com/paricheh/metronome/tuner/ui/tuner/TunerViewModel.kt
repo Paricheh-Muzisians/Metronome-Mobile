@@ -9,6 +9,7 @@ import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
+import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.cancelAndJoin
@@ -137,19 +138,20 @@ class TunerViewModel(
     }
 
     private fun observeInstrument() {
-        preferences.selectedInstrumentKey
-            .onEach { key ->
-                val instrument = allInstruments.value
-                    .firstOrNull {
-                        it.key == key
-                    }
-                instrument?.let {
-                    _selectedInstrument.emit(it)
-                }
+        combine(
+            preferences.selectedInstrumentKey,
+            allInstruments
+        ) { key, instruments ->
+            if (instruments.isEmpty()) return@combine null
+            instruments.firstOrNull { it.key == key }
+                ?: instruments.firstOrNull { key.startsWith("setar") && it is Setar }
+                ?: instruments.firstOrNull()
+        }.onEach { instrument ->
+            instrument?.let {
+                _selectedInstrument.emit(it)
             }
-            .catch {
-                //TODO Log
-            }
-            .launchIn(viewModelScope)
+        }.catch {
+            //TODO Log
+        }.launchIn(viewModelScope)
     }
 }

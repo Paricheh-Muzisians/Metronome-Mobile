@@ -149,10 +149,20 @@
     <string name="guitar">گیتار</string>
     <string name="piano">پیانو</string>
     <string name="standard">استاندارد</string>
-    <string name="mahoor">ماهور</string>
-    <string name="shur_do">شور دو</string>
-    <string name="shur_re">شور ر</string>
-    <string name="shur_sol">شور سل</string>
     <string name="eighteen_eight_key_piano">۸۸ کلید</string>
     <string name="setar">سه‌تار</string>
+
+    <string name="choose_instrument">انتخاب ساز</string>
+    <string name="setar_tunings">کوک‌های سه‌تار</string>
+
+    <string name="setar_mahoor">ماهور</string>
+    <string name="setar_shur">شور</string>
+    <string name="setar_homayoun">همایون</string>
+    <string name="setar_chahargah">چهارگاه</string>
+    <string name="setar_rastpanjgah">راست‌پنجگاه</string>
+    <string name="setar_nava">نوا</string>
+    <string name="setar_esfahan">بیات اصفهان</string>
+    <string name="setar_abuata">ابوعطا</string>
+    <string name="setar_dashti">دشتی</string>
+    <string name="setar_bayattork">بیات ترک</string>
 </resources>

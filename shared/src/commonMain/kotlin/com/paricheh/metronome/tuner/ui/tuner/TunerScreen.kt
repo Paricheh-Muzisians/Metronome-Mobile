@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -51,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.composeunstyled.SheetDetent
 import com.composeunstyled.rememberModalBottomSheetState
+import com.paricheh.metronome.core.analytics.LocalAnalyticsManager
 import com.paricheh.metronome.core.platform.LocalPlatformActionHandler
 import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.model.TunerState
@@ -86,6 +88,7 @@ fun TunerScreen(
     val scope = rememberCoroutineScope()
     val platformActionHandler = LocalPlatformActionHandler.current
 
+    val analyticsManager = LocalAnalyticsManager.current
     val tunerState by viewModel.tunerState.collectAsStateWithLifecycle()
     val selectedNote by viewModel.selectedNote.collectAsStateWithLifecycle()
     val selectedInstrument by viewModel.selectedInstrument.collectAsStateWithLifecycle()
@@ -97,10 +100,19 @@ fun TunerScreen(
                 viewModel.showPermissionDialog.value = false
                 viewModel.startTuner()
             } else {
+                analyticsManager.track(
+                    "tuner_ungranted_microphone_permission"
+                )
                 viewModel.showPermissionDialog.value = true
             }
         }
     )
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.increaseRatingPoint()
+        }
+    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.checkPermission()
@@ -119,11 +131,17 @@ fun TunerScreen(
     if (showPermissionDialog) {
         PermissionDialog(
             onOpenSettings = {
+                analyticsManager.track(
+                    "tuner_open_setting_because_of_permission"
+                )
                 platformActionHandler.openAppSettings()
                 onHasBackgroundBlurChanged(false)
             },
             onBack = {
                 navController.popBackStack()
+                analyticsManager.track(
+                    "tuner_back_because_of_permission"
+                )
                 onHasBackgroundBlurChanged(false)
             }
         )
@@ -213,7 +231,6 @@ fun TunerScreenContent(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.tertiary
                             )
-
                         }
                     ) {
                         Text(

@@ -2,7 +2,9 @@ package com.paricheh.metronome.tuner.ui.tuner
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paricheh.metronome.core.analytics.AnalyticsManager
 import com.paricheh.metronome.core.soundplayer.TunerSoundPlayer
+import com.paricheh.metronome.rating.data.repository.RatingRepository
 import com.paricheh.metronome.tuner.data.preferences.TunerPreferences
 import com.paricheh.metronome.tuner.data.repository.TunerRepository
 import com.paricheh.metronome.tuner.model.NoteInfo
@@ -10,6 +12,8 @@ import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
 import com.paricheh.metronome.tuner.ui.utils.instrument.Setar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.cancelAndJoin
@@ -27,6 +31,8 @@ class TunerViewModel(
     private val preferences: TunerPreferences,
     private val tunerSoundPlayer: TunerSoundPlayer,
     private val permissionChecker: PermissionChecker,
+    private val ratingRepository: RatingRepository,
+    private val analyticsManager: AnalyticsManager,
 ) : ViewModel() {
     var observeTunerJob: Job? = null
 
@@ -51,6 +57,12 @@ class TunerViewModel(
         observeInstrument()
         getAllInstruments()
         handleInstrumentChange()
+    }
+
+    fun increaseRatingPoint() {
+        viewModelScope.launch(Dispatchers.IO) {
+            ratingRepository.increaseRatingPoint(5)
+        }
     }
 
     fun checkPermission() {
@@ -78,8 +90,8 @@ class TunerViewModel(
     }
 
     override fun onCleared() {
-        super.onCleared()
         stopTuner()
+        super.onCleared()
     }
 
     fun selectNote(note: NoteInfo?) {
@@ -93,6 +105,12 @@ class TunerViewModel(
 
     fun selectInstrument(instrument: Instrument) {
         viewModelScope.launch {
+            analyticsManager.track(
+                "select_instrument",
+                parameters = mapOf(
+                    "instrument" to instrument.key
+                )
+            )
             preferences.setSelectedInstrumentKey(instrument.key)
         }
     }

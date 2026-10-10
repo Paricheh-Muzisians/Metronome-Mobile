@@ -34,7 +34,7 @@ class TunerViewModel(
     private val ratingRepository: RatingRepository,
     private val analyticsManager: AnalyticsManager,
 ) : ViewModel() {
-    var observeTunerJob: Job? = null
+    private var observeTunerJob: Job? = null
 
     private val _selectedNote = MutableStateFlow<NoteInfo?>(null)
     val selectedNote = _selectedNote.asStateFlow()
@@ -48,7 +48,8 @@ class TunerViewModel(
     private val _allInstruments = MutableStateFlow<List<Instrument>>(listOf())
     val allInstruments = _allInstruments.asStateFlow()
 
-    val showPermissionDialog = MutableStateFlow(false)
+    private val _showPermissionDialog = MutableStateFlow(false)
+    val showPermissionDialog = _showPermissionDialog.asStateFlow()
 
     private val _shouldRequestPermission = Channel<Boolean>(Channel.BUFFERED)
     val shouldRequestPermission = _shouldRequestPermission.receiveAsFlow()
@@ -65,13 +66,25 @@ class TunerViewModel(
         }
     }
 
+    fun onPermissionResult(isGranted: Boolean) {
+        if (isGranted) {
+            _showPermissionDialog.value = false
+            startTuner()
+        } else {
+            analyticsManager.track(
+                "tuner_ungranted_microphone_permission"
+            )
+            _showPermissionDialog.value = true
+        }
+    }
+
     fun checkPermission() {
         if (permissionChecker.isAudioPermissionGranted()) {
-            showPermissionDialog.value = false
+            _showPermissionDialog.value = false
             startTuner()
         } else {
             stopTuner()
-            if (!showPermissionDialog.value) {
+            if (!_showPermissionDialog.value) {
                 _shouldRequestPermission.trySend(true)
             }
         }

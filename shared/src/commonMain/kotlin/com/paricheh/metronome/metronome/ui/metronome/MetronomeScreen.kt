@@ -77,6 +77,7 @@ import metronome.shared.generated.resources.cd_settings
 import metronome.shared.generated.resources.continue_text
 import metronome.shared.generated.resources.horizontal_illustration_area
 import metronome.shared.generated.resources.ic_tuner
+import metronome.shared.generated.resources.metronome_title
 import metronome.shared.generated.resources.metroneome_pendulum_axis_layer
 import metronome.shared.generated.resources.metronome_body_layer
 import metronome.shared.generated.resources.metronome_sliding_weight
@@ -281,7 +282,7 @@ fun MetronomeScreen(
                                 horizontal = 12.dp,
                                 vertical = 4.dp
                             ),
-                        text = "مترونوم",
+                        text = stringResource(Res.string.metronome_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )

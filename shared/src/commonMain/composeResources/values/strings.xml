@@ -115,7 +115,13 @@
     <!-- BPM -->
     <string name="bpm">بی‌پی‌ام</string>
     <!-- Tuner -->
+    <string name="metronome_title">مترونوم</string>
     <string name="tuner_title">کوک</string>
+    <string name="tuner_badge_beta">آزمایشی</string>
+    <string name="tuner_tighten_string">سیم را سفت‌تر کنید</string>
+    <string name="tuner_loosen_string">سیم را شل‌تر کنید</string>
+    <string name="tuning_count_format">%1$d کوک</string>
+    <string name="select_piano_key">انتخاب کلاویه</string>
     <string name="tuner_status_idle">آماده برای شروع</string>
     <string name="tuner_status_listening">در حال شنیدن...</string>
     <string name="tuner_status_no_signal">سیگنالی یافت نشد</string>

@@ -73,6 +73,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.cd_back
+import metronome.shared.generated.resources.tuner_badge_beta
+import metronome.shared.generated.resources.tuner_loosen_string
+import metronome.shared.generated.resources.tuner_tighten_string
 import metronome.shared.generated.resources.tuner_title
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -96,15 +99,7 @@ fun TunerScreen(
     val showPermissionDialog by viewModel.showPermissionDialog.collectAsStateWithLifecycle()
     val permissionState = rememberAudioPermissionState(
         onPermissionResult = { isGranted ->
-            if (isGranted) {
-                viewModel.showPermissionDialog.value = false
-                viewModel.startTuner()
-            } else {
-                analyticsManager.track(
-                    "tuner_ungranted_microphone_permission"
-                )
-                viewModel.showPermissionDialog.value = true
-            }
+            viewModel.onPermissionResult(isGranted)
         }
     )
 
@@ -227,7 +222,7 @@ fun TunerScreenContent(
                     BadgedBox(
                         badge = {
                             Text(
-                                text = "آزمایشی",
+                                text = stringResource(Res.string.tuner_badge_beta),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.tertiary
                             )
@@ -342,15 +337,15 @@ fun TunerMainDisplay(
         }
     }
 
-    val hintText: String? by remember(centDiff) {
+    val hintTextRes by remember(centDiff) {
         derivedStateOf {
             val cent = centDiff
             if (cent == null || cent in -goodThreshold..goodThreshold) {
                 null
             } else if (cent < 0) {
-                "    سیم را سفت\u200Cتر کنید"
+                Res.string.tuner_tighten_string
             } else if (cent > 0) {
-                "    سیم را شل\u200Cتر کنید"
+                Res.string.tuner_loosen_string
             } else {
                 null
             }
@@ -424,7 +419,7 @@ fun TunerMainDisplay(
             ),
             title = {
                 Text(
-                    text = hintText.orEmpty(),
+                    text = hintTextRes?.let { stringResource(it) }.orEmpty(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )

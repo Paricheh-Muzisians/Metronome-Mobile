@@ -3,8 +3,6 @@ package com.paricheh.metronome.tuner.ui.tuner.component
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,7 +55,7 @@ import metronome.shared.generated.resources.choose_instrument
 import metronome.shared.generated.resources.guitar
 import metronome.shared.generated.resources.piano
 import metronome.shared.generated.resources.setar
-import metronome.shared.generated.resources.setar_tunings
+import metronome.shared.generated.resources.tuning_count_format
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -201,7 +198,7 @@ private fun MainInstrumentList(
                     val subtitleText = when {
                         !isMultiVariant -> stringResource(group.instruments.first().getTypeText())
                         containsCurrent -> stringResource(currentInstrument.getTypeText())
-                        else -> "${group.instruments.size} کوک"
+                        else -> stringResource(Res.string.tuning_count_format, group.instruments.size)
                     }
 
                     Text(
@@ -266,7 +263,7 @@ private fun SubtypeList(
             }
 
             Text(
-                text = stringResource(Res.string.setar_tunings),
+                text = stringResource(group.titleRes),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )

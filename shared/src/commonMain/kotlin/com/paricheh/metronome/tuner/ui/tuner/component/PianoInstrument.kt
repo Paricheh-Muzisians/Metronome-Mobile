@@ -34,6 +34,9 @@ import androidx.compose.ui.unit.dp
 import com.paricheh.metronome.tuner.model.NoteInfo
 import com.paricheh.metronome.tuner.model.isSameNote
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
+import metronome.shared.generated.resources.Res
+import metronome.shared.generated.resources.select_piano_key
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 @Composable
@@ -99,7 +102,7 @@ internal fun PianoInstrument(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "انتخاب کلاویه",
+                    text = stringResource(Res.string.select_piano_key),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start

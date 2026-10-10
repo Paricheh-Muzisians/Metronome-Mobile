@@ -84,7 +84,10 @@ class AndroidAudioEngine : AudioEngine {
 
         audioRecord?.apply {
             if (state == AudioRecord.STATE_INITIALIZED) {
-                stop()
+                try {
+                    stop()
+                } catch (_: Exception) {
+                }
             }
             release()
         }

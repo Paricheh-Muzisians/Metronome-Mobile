@@ -455,6 +455,17 @@ private fun PianoInstrument(
     val surfaceColor = MaterialTheme.colorScheme.surface
     val lazyState = rememberLazyListState()
 
+    val selectedIndex = remember(selectedNote, currentInstrument.notes) {
+        if (selectedNote == null) -1
+        else currentInstrument.notes.indexOfFirst { it.isSameNote(selectedNote) }
+    }
+
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0) {
+            lazyState.animateScrollToItem(selectedIndex)
+        }
+    }
+
     LazyColumn(
         state = lazyState,
         modifier = Modifier
@@ -495,7 +506,7 @@ private fun PianoInstrument(
             ) {
                 HorizontalDivider()
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = "انتخاب کلاویه",
@@ -547,7 +558,7 @@ private fun PianoInstrument(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
-                    text = index.toString(),
+                    text = (index + 1).toString(),
                     style = MaterialTheme.typography.titleSmall,
                     color = textColor
                 )

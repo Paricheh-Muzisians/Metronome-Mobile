@@ -21,8 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.model.isSameNote
 import com.paricheh.metronome.tuner.ui.utils.instrument.Instrument
-import com.paricheh.metronome.tuner.ui.utils.instrument.SetarMahoor
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.setar_headstock
 import org.jetbrains.compose.resources.painterResource
@@ -49,7 +49,7 @@ fun SetarInstrumentSection(
                 .forEach {
                     NoteButtons(
                         name = it.note.displayName,
-                        isSelected = selectedNote == it,
+                        isSelected = selectedNote.isSameNote(it),
                         onClick = {
                             onSelectNote(it)
                         }
@@ -73,7 +73,7 @@ fun SetarInstrumentSection(
                 .forEach {
                     NoteButtons(
                         name = it.note.displayName,
-                        isSelected = selectedNote == it,
+                        isSelected = selectedNote.isSameNote(it),
                         onClick = {
                             onSelectNote(it)
                         }

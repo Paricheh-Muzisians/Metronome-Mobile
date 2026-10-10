@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.model.isSameNote
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
 import metronome.shared.generated.resources.Res
 import metronome.shared.generated.resources.standard_guitar_headstock
@@ -45,7 +46,7 @@ fun Guitar6StringInstrumentSection(
             currentInstrument.notes.takeLast(3).forEach {
                 NoteButtons(
                     name = it.note.displayName,
-                    isSelected = selectedNote == it,
+                    isSelected = selectedNote.isSameNote(it),
                     onClick = {
                         onSelectNote(it)
                     }
@@ -69,7 +70,7 @@ fun Guitar6StringInstrumentSection(
                 .reversed().forEach {
                     NoteButtons(
                         name = it.note.displayName,
-                        isSelected = selectedNote == it,
+                        isSelected = selectedNote.isSameNote(it),
                         onClick = {
                             onSelectNote(it)
                         }

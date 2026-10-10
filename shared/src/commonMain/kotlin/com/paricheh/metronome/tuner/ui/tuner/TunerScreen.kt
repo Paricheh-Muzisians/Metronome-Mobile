@@ -62,6 +62,7 @@ import com.composeunstyled.SheetDetent
 import com.composeunstyled.rememberModalBottomSheetState
 import com.paricheh.metronome.core.platform.LocalPlatformActionHandler
 import com.paricheh.metronome.tuner.model.NoteInfo
+import com.paricheh.metronome.tuner.model.isSameNote
 import com.paricheh.metronome.tuner.model.TunerState
 import com.paricheh.metronome.tuner.ui.tuner.component.Guitar6StringInstrumentSection
 import com.paricheh.metronome.tuner.ui.tuner.component.InstrumentSelectorBottomSheet
@@ -506,7 +507,7 @@ private fun PianoInstrument(
         }
 
         itemsIndexed(currentInstrument.notes) { index, note ->
-            val isSelectedTransition = updateTransition(note == selectedNote)
+            val isSelectedTransition = updateTransition(note.isSameNote(selectedNote))
             val backgroundColor by isSelectedTransition.animateColor {
                 if (it) {
                     MaterialTheme.colorScheme.primaryContainer

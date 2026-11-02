@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.paricheh.metronome.tuner.data.preferences.TunerPreferences
 import com.paricheh.metronome.tuner.ui.utils.instrument.Guitar6String
+import com.paricheh.metronome.tuner.ui.utils.instrument.Piano88
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -23,7 +24,7 @@ class TunerPreferencesImpl(
     private val dataStore = context.dataStore
 
     override val selectedInstrumentKey: Flow<String> = dataStore.data
-        .map { it[SELECTED_INSTRUMENT] ?: Guitar6String.KEY }
+        .map { it[SELECTED_INSTRUMENT] ?: Piano88.KEY }
 
     override suspend fun setSelectedInstrumentKey(key: String) {
         dataStore.edit {

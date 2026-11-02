@@ -144,7 +144,8 @@ class TunerViewModel(
             if (instrument != null) {
                 startObservingTunerResult(
                     note = note,
-                    notes = instrument.notes
+                    notes = instrument.notes,
+                    instrument = instrument
                 )
             }
         }.launchIn(viewModelScope)
@@ -154,12 +155,14 @@ class TunerViewModel(
     private fun startObservingTunerResult(
         note: NoteInfo?,
         notes: List<NoteInfo>,
+        instrument: Instrument?,
     ) {
         viewModelScope.launch {
             observeTunerJob?.cancelAndJoin()
             observeTunerJob = tunerRepository.observeTuner(
                 targetNote = note,
-                notes = notes
+                notes = notes,
+                instrument = instrument
             )
                 .onEach {
                     _tunerState.emit(it)

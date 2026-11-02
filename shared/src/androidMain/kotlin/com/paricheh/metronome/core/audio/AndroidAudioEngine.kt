@@ -20,7 +20,8 @@ class AndroidAudioEngine : AudioEngine {
     private val sampleRate = 44100
     private val channelConfig = AudioFormat.CHANNEL_IN_MONO
     private val audioFormat = AudioFormat.ENCODING_PCM_16BIT
-    private val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+    private val minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
+    private val bufferSize = maxOf(minBufferSize, 4096 * 2)
 
     private var audioRecord: AudioRecord? = null
     private var job: Job? = null
@@ -35,17 +36,40 @@ class AndroidAudioEngine : AudioEngine {
     override suspend fun start() {
         if (running) return
 
-        val recorder = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            sampleRate,
-            channelConfig,
-            audioFormat,
-            bufferSize
+        // Audio source priority for instrument measurement:
+        // 1. UNPROCESSED (bypasses OS AGC, noise suppression, and speech high-pass filters)
+        // 2. VOICE_RECOGNITION (disables AGC and most voice processing on older devices)
+        // 3. MIC (standard fallback)
+        val audioSources = listOf(
+            MediaRecorder.AudioSource.UNPROCESSED,
+            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            MediaRecorder.AudioSource.MIC
         )
 
-        if (recorder.state != AudioRecord.STATE_INITIALIZED) {
-            recorder.release()
-            throw IllegalStateException("AudioRecord could not be initialized")
+        var recorder: AudioRecord? = null
+        for (source in audioSources) {
+            try {
+                val candidate = AudioRecord(
+                    source,
+                    sampleRate,
+                    channelConfig,
+                    audioFormat,
+                    bufferSize
+                )
+                if (candidate.state == AudioRecord.STATE_INITIALIZED) {
+                    recorder = candidate
+                    break
+                } else {
+                    candidate.release()
+                }
+            } catch (_: Exception) {
+                // Try next audio source
+            }
+        }
+
+        if (recorder == null || recorder.state != AudioRecord.STATE_INITIALIZED) {
+            recorder?.release()
+            throw IllegalStateException("AudioRecord could not be initialized with any audio source")
         }
 
         audioRecord = recorder

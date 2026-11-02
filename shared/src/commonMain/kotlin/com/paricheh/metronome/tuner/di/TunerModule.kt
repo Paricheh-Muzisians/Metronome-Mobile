@@ -1,5 +1,6 @@
 package com.paricheh.metronome.tuner.di
 
+import com.paricheh.metronome.tuner.data.detector.InstrumentPitchTracker
 import com.paricheh.metronome.tuner.data.detector.PitchDetector
 import com.paricheh.metronome.tuner.data.detector.YinPitchDetector
 import com.paricheh.metronome.tuner.data.normalizer.FrequencyNormalizer
@@ -13,7 +14,8 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val tunerModule = module {
-    single<PitchDetector> { YinPitchDetector() }
+    single { YinPitchDetector() }
+    single<PitchDetector> { InstrumentPitchTracker(get()) }
     single<FrequencyNormalizer> { SimpleFrequencyNormalizer() }
     single<Tuner> { ChromaticTuner() }
 

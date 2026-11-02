@@ -5,16 +5,19 @@ import kotlin.math.log2
 import kotlin.time.Clock
 
 /**
- * Robust frequency normalizer utilizing Median Filtering and Hysteresis Hold Duration.
+ * Robust frequency normalizer combining Median Filtering, Adaptive EMA Smoothing,
+ * and Hysteresis Hold Duration.
  *
- * Replaces linear EMA frequency blending with:
- * 1. Median filter (window size N=5) to reject single-frame octave spikes and glitches.
- * 2. Release hold duration (150ms) to prevent needle flickering during momentary amplitude drops.
- * 3. Confidence thresholding tailored to the pitch detector quality gate.
+ * Implements:
+ * 1. 3-tap median filter to strip isolated single-frame pitch spikes without introducing lag.
+ * 2. Adaptive Exponential Moving Average (EMA) smoother:
+ *    - Snappy attack (alpha = 1.0) on new note plucks / large transitions.
+ *    - Ultra-smooth tracking (alpha = 0.25) during note sustain to eliminate needle jitter.
+ * 3. Hysteresis hold duration (150ms) to prevent visual flickering during momentary amplitude dips.
  */
 class SimpleFrequencyNormalizer(
-    private val windowSize: Int = 5,
-    private val minConfidence: Float = 0.55f,
+    private val windowSize: Int = 3,
+    private val minConfidence: Float = 0.45f,
     private val holdDurationMs: Long = 150L
 ) : FrequencyNormalizer {
 
@@ -22,7 +25,7 @@ class SimpleFrequencyNormalizer(
     private var historyCount = 0
     private var historyHead = 0
     private var lastValidTimestamp: Long = 0L
-    private var lastEmittedFrequency: Float = 0f
+    private var smoothedFrequency: Float = 0f
 
     override fun normalize(frequency: Float, confidence: Float): Float {
         val currentTime = currentTimeMillis()
@@ -30,35 +33,42 @@ class SimpleFrequencyNormalizer(
         if (frequency <= 0f || confidence < minConfidence) {
             // Signal drop / low confidence: apply hold duration hysteresis
             return if (lastValidTimestamp > 0L && (currentTime - lastValidTimestamp) < holdDurationMs) {
-                lastEmittedFrequency
+                smoothedFrequency
             } else {
                 reset()
                 0f
             }
         }
 
-        // Check for octave jump relative to current median
-        val currentMedian = calculateMedian()
-        if (currentMedian > 0f && isOctaveJump(frequency, currentMedian)) {
-            // Momentary octave jump spike: hold current median instead of adding octave jump to history
-            lastValidTimestamp = currentTime
-            return currentMedian
-        }
-
-        // Add valid frequency to circular buffer
+        // Add valid frequency to circular buffer for median filtering
         addSample(frequency)
         lastValidTimestamp = currentTime
 
-        val filteredFreq = calculateMedian()
-        lastEmittedFrequency = filteredFreq
-        return filteredFreq
+        val medianFreq = calculateMedian()
+
+        // Adaptive EMA Smoothing:
+        if (smoothedFrequency <= 0f) {
+            smoothedFrequency = medianFreq
+        } else {
+            val centsDiff = abs(1200f * log2(medianFreq / smoothedFrequency))
+            val alpha = if (centsDiff > 50f) {
+                // New note / pluck attack: instantaneous snap
+                1.0f
+            } else {
+                // Sustain: smooth smoothing for rock-solid visual needle
+                0.25f
+            }
+            smoothedFrequency = alpha * medianFreq + (1f - alpha) * smoothedFrequency
+        }
+
+        return smoothedFrequency
     }
 
     override fun reset() {
         historyCount = 0
         historyHead = 0
         lastValidTimestamp = 0L
-        lastEmittedFrequency = 0f
+        smoothedFrequency = 0f
     }
 
     private fun addSample(value: Float) {
@@ -71,6 +81,7 @@ class SimpleFrequencyNormalizer(
 
     private fun calculateMedian(): Float {
         if (historyCount == 0) return 0f
+        if (historyCount == 1) return history[0]
 
         val temp = FloatArray(historyCount)
         for (i in 0 until historyCount) {
@@ -83,14 +94,6 @@ class SimpleFrequencyNormalizer(
         } else {
             (temp[historyCount / 2 - 1] + temp[historyCount / 2]) / 2f
         }
-    }
-
-    private fun isOctaveJump(freq1: Float, freq2: Float): Boolean {
-        if (freq1 <= 0f || freq2 <= 0f) return false
-        val ratio = freq1 / freq2
-        val semitones = abs(12f * log2(ratio))
-        // Check if semitones distance is near 12 (octave high) or -12 (octave low) within +/- 1.5 semitones
-        return abs(semitones - 12f) < 1.5f || abs(semitones - 24f) < 1.5f
     }
 
     private fun currentTimeMillis(): Long {

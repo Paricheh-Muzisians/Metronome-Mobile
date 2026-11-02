@@ -1,6 +1,7 @@
 package com.paricheh.metronome.tuner.data.repository
 
 import com.paricheh.metronome.core.audio.AudioEngine
+import com.paricheh.metronome.tuner.data.detector.InstrumentPitchTracker
 import com.paricheh.metronome.tuner.data.detector.PitchDetector
 import com.paricheh.metronome.tuner.data.normalizer.FrequencyNormalizer
 import com.paricheh.metronome.tuner.data.tuner.Tuner
@@ -37,7 +38,13 @@ class TunerRepositoryImpl(
     override fun observeTuner(
         targetNote: NoteInfo?,
         notes: List<NoteInfo>,
+        instrument: Instrument?,
     ): Flow<TunerState> {
+        if (pitchDetector is InstrumentPitchTracker) {
+            pitchDetector.configureForInstrument(instrument)
+        }
+        normalizer.reset()
+
         return audioEngine.observeAudioFrames()
             .map { frame ->
                 val pitchResult = pitchDetector.detect(frame)

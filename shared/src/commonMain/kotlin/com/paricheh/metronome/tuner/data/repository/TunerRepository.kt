@@ -14,6 +14,7 @@ interface TunerRepository {
     fun observeTuner(
         targetNote: NoteInfo?,
         notes: List<NoteInfo>,
+        instrument: Instrument? = null,
     ): Flow<TunerState>
 
     suspend fun startTuner()
